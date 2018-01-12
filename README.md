@@ -4,11 +4,13 @@ PRIMME
 
 This package is an R interface to PRIMME, a C library for computing a few eigenvalues and their corresponding eigenvectors of a real symmetric or complex Hermitian matrix. It can also compute singular values and vectors of a square or rectangular matrix. It can find largest, smallest, or interior singular/eigenvalues and can use preconditioning to accelerate convergence. It is especially optimized for large, difficult problems, and can be a useful tool for both non-experts and experts.
 
+The main contributors to PRIMME are James R. McCombs, Eloy Romero Alcalde, Andreas Stathopoulos and Lingfei Wu.
+
 Use the following two references to cite this package:
 
 -   A. Stathopoulos and J. R. McCombs *PRIMME: PReconditioned Iterative MultiMethod Eigensolver: Methods and software description*, ACM Transaction on Mathematical Software Vol. 37, No. 2, (2010), 21:1-21:30.
 
--   L. Wu, E. Romero and A. Stathopoulos, *PRIMME\_SVDS: A High-Performance Preconditioned SVD Solver for Accurate Large-Scale Computations*, arXiv:1607.01404
+-   L. Wu, E. Romero and A. Stathopoulos, *PRIMME\_SVDS: A High-Performance Preconditioned SVD Solver for Accurate Large-Scale Computations*, J. Sci. Comput., Vol. 39, No. 5, (2017), S248--S271.
 
 Installation Instructions
 =========================
@@ -65,7 +67,7 @@ r
 #> [1] 0
 #> 
 #> $stats$elapsedTime
-#> [1] 0.0006670952
+#> [1] 0.0006821156
 #> 
 #> $stats$estimateMinEval
 #> [1] 1
@@ -77,7 +79,7 @@ r
 #> [1] 10
 #> 
 #> $stats$timeMatvec
-#> [1] 0.0004501343
+#> [1] 0.0003759861
 #> 
 #> $stats$timePrecond
 #> [1] 0
@@ -104,11 +106,11 @@ A <- diag(1:5000)
 
 r <- eigs_sym(A, 10, 'SA');
 r$stats$numMatvecs
-#> [1] 1146
+#> [1] 1201
 
 r <- eigs_sym(A, 10, 'SA', tol=1e-3); 
 r$stats$numMatvecs
-#> [1] 409
+#> [1] 414
 ```
 
 Preconditioners, if available can reduce the time/matrix-vector multiplications significantly (see TODO):
@@ -120,9 +122,9 @@ for(i in 1:4999) {A[i,i+1]<-1; A[i+1,i]<-1}
 
 r <- eigs_sym(A, 10, 'SA');
 r$stats$numMatvecs
-#> [1] 1179
+#> [1] 1323
 r$stats$elapsedTime
-#> [1] 5.297332
+#> [1] 6.180366
 
 # Jacobi preconditioner
 P = diag(A);
@@ -130,7 +132,7 @@ r <- eigs_sym(A, 10, 'SA', prec=function(x)x/P);
 r$stats$numMatvecs
 #> [1] 51
 r$stats$elapsedTime
-#> [1] 0.2373209
+#> [1] 0.2492089
 ```
 
 Dense matrices, sparse matrices, and functions that return the matrix-vector product can be passed as the matrix problem `A`:
@@ -192,10 +194,10 @@ kable(r, digits=2, caption="2 largest eigenvalues on dense matrix")
 
 | test     | time    | matvecs | rnorm        |
 |:---------|:--------|:--------|:-------------|
-| PRIMME   | 13.312  | 500     | 0.1129397    |
-| irlba    | 86.767  | --      | 0.04308973   |
-| RSpectra | 57.78   | 2192    | 9.512001e-07 |
-| trlan    | 324.302 | --      | 0.1197901    |
+| PRIMME   | 15.502  | 550     | 0.1129294    |
+| irlba    | 93.184  | --      | 0.04308973   |
+| RSpectra | 62.717  | 2192    | 9.512001e-07 |
+| trlan    | 355.859 | --      | 0.1197901    |
 
 ``` r
 Ad <- diag(1:6000);
@@ -213,9 +215,9 @@ kable(r, digits=2, caption="5 eigenvalues closest to zero on dense matrix")
 
 | test        | time  | matvecs | rnorm        |
 |:------------|:------|:--------|:-------------|
-| PRIMME      | 3.852 | 555     | 0.0005940415 |
-| PRIMME Prec | 0.284 | 42      | 0.0004805318 |
-| RSpectra    | 9.067 | 1433    | 4.884529e-08 |
+| PRIMME      | 4.742 | 655     | 0.0005940415 |
+| PRIMME Prec | 0.363 | 49      | 0.0003416209 |
+| RSpectra    | 9.903 | 1433    | 4.884529e-08 |
 
 By default PRIMME tries to guess the best configuration, but a little hint can help sometimes. The next example sets the preset method `'PRIMME_DEFAULT_MIN_TIME'` that takes advantage of very light matrix-vector products.
 
@@ -236,10 +238,10 @@ kable(r, digits=2, caption="40 eigenvalues closest to zero on dense matrix")
 
 | test            | time   | matvecs | rnorm        |
 |:----------------|:-------|:--------|:-------------|
-| PRIMME defaults | 73.319 | 13436   | 4.991904e-06 |
-| PRIMME min time | 8.332  | 18945   | 4.935499e-06 |
-| PRIMME Prec     | 2.153  | 311     | 4.411372e-06 |
-| RSpectra        | 14.508 | 4343    | 4.224989e-09 |
+| PRIMME defaults | 13.597 | 18315   | 4.993289e-06 |
+| PRIMME min time | 8.444  | 18945   | 4.935499e-06 |
+| PRIMME Prec     | 2.224  | 770     | 4.290923e-06 |
+| RSpectra        | 14.751 | 4343    | 4.224989e-09 |
 
 Singular value problems
 -----------------------
@@ -300,16 +302,16 @@ r
 #> [1] 0
 #> 
 #> $stats$elapsedTime
-#> [1] 0.0001549721
+#> [1] 0.0001609325
 #> 
 #> $stats$estimateANorm
 #> [1] 10
 #> 
 #> $stats$timeMatvec
-#> [1] 2.861023e-06
+#> [1] 5.960464e-06
 #> 
 #> $stats$timePrecond
-#> [1] 0
+#> [1] 9.536743e-07
 ```
 
 The next examples show how to compute the smallest singular values and how to specify some tolerance:
@@ -323,16 +325,16 @@ r$d
 
 r <- svds(A, 3, 'S', tol=1e-5);
 r$rnorms # this is should be smaller than ||A||*tol
-#> [1] 0.0009489247 0.0007254660 0.0010843363
+#> [1] 0.0007164257 0.0014383196 0.0012264714
 ```
 
-The next example shows the use of a diagonal preconditioner based on \(A^*A\) (see TODO):
+The next example shows the use of a diagonal preconditioner based on *A*<sup>\*</sup>*A* (see TODO):
 
 ``` r
 A <- rbind(rep(1,n=100), diag(1:100, 500,100))
 r <- svds(A, 3, 'S');
 r$stats$numMatvecs
-#> [1] 702
+#> [1] 662
 
 P <- colSums(A^2);  # Jacobi preconditioner of Conj(t(A))%*%A
 r <- svds(A, 3, 'S', prec=list(AHA=function(x)x/P));
@@ -380,13 +382,13 @@ r <- bench_svds(
 kable(r, digits=2, caption="2 largest singular values on dense matrix")
 ```
 
-| test     | time   | matvecs | rnorm        |
-|:---------|:-------|:--------|:-------------|
-| PRIMME   | 3.02   | 232     | 0.001487547  |
-| irlba    | 4.364  | 342     | 0.001719602  |
-| RSpectra | 10.816 | 636     | 2.995926e-09 |
-| trlan    | 6.058  | --      | 0.001331501  |
-| propack  | 3.072  | --      | 0.001757105  |
+| test     | time  | matvecs | rnorm        |
+|:---------|:------|:--------|:-------------|
+| PRIMME   | 3.857 | 280     | 0.001440893  |
+| irlba    | 4.563 | 342     | 0.001719602  |
+| RSpectra | 9.825 | 636     | 2.995926e-09 |
+| trlan    | 6.614 | --      | 0.001331501  |
+| propack  | 3.328 | --      | 0.001757105  |
 
 PRIMME can take advantage of a light matrix-vector product:
 
@@ -403,16 +405,16 @@ kable(r, digits=2, caption="40 largest singular values on sparse matrix")
 
 | test     | time   | matvecs | rnorm        |
 |:---------|:-------|:--------|:-------------|
-| PRIMME   | 3.7    | 12216   | 0.4924661    |
-| irlba    | 12.657 | 4244    | 1.708491     |
-| RSpectra | 14.198 | 4236    | 5.444241e-06 |
+| PRIMME   | 3.718  | 12216   | 0.4924661    |
+| irlba    | 13.804 | 4244    | 1.708491     |
+| RSpectra | 14.16  | 4236    | 5.444241e-06 |
 
 And for now it is the only package that supports computing the smallest singular values:
 
 ``` r
 # Get LargeReFile from UF matrix collection
 tf <- tempfile();
-download.file('http://www.cise.ufl.edu/research/sparse/MM/Stevenson/LargeRegFile.tar.gz',tf);
+download.file('https://sparse.tamu.edu/MM/Stevenson/LargeRegFile.tar.gz',tf);
 td <- tempdir();
 untar(tf, exdir=td);
 As <- as(readMM(paste(td,'LargeRegFile/LargeRegFile.mtx',sep='/')), "dgCMatrix");
@@ -428,10 +430,10 @@ r <- bench_svds(
 kable(r, digits=2, caption="5 smallest singular values on sparse matrix")
 ```
 
-| test        | time    | matvecs | rnorm        |
-|:------------|:--------|:--------|:-------------|
-| PRIMME      | 438.589 | 25528   | 2.715613e-07 |
-| PRIMME Prec | 19.636  | 1086    | 2.906932e-07 |
+| test        | time   | matvecs | rnorm        |
+|:------------|:-------|:--------|:-------------|
+| PRIMME      | 554.16 | 26810   | 2.225024e-07 |
+| PRIMME Prec | 22.046 | 1022    | 2.782366e-07 |
 
 TODO
 ====
@@ -447,7 +449,7 @@ r <- eigs_sym(A, 10, 'SA');
 r$stats$numMatvecs
 #> [1] 698
 r$stats$elapsedTime
-#> [1] 0.06746888
+#> [1] 0.067518
 
 # Jacobi preconditioner
 P = diag(diag(A));
@@ -455,7 +457,7 @@ r <- eigs_sym(A, 10, 'SA', prec=P);
 r$stats$numMatvecs
 #> [1] 58
 r$stats$elapsedTime
-#> [1] 1.027588
+#> [1] 1.062686
 ```
 
 -   Add support for matrices distributed among processes.
