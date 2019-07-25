@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, College of William & Mary
+ * Copyright (c) 2018, College of William & Mary
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,20 +53,6 @@
 #  undef REAL_SUF
 #endif
 
-#ifdef REAL_PART
-#  undef REAL_PART
-#endif
-
-#ifdef ABS
-#  undef ABS
-#endif
-
-#ifdef CONJ
-#  undef CONJ
-#endif
-
-#ifdef TEMPLATE_H
-#  undef TEMPLATE_H
-#endif
+#include "template_undef.h"
 
 #endif

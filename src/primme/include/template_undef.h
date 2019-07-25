@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, College of William & Mary
+ * Copyright (c) 2018, College of William & Mary
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,46 +27,35 @@
  * PRIMME: https://github.com/primme/primme
  * Contact: Andreas Stathopoulos, a n d r e a s _at_ c s . w m . e d u
  *******************************************************************************
- * File: primme_f77_private.h
+ * File: template_undef.h
  *
- * Purpose - Definitions used exclusively by primme_f77.c
+ * Purpose - Undefine macros defined in template.h
  *
  ******************************************************************************/
 
-#ifndef PRIMME_F77_PRIVATE_H
-#define PRIMME_F77_PRIVATE_H
+#ifdef TEMPLATE_H
 
-#include "template.h"
-#include "primme_interface.h" /* for Sprimme */
+#undef TEMPLATE_H
+#undef HOST_STEM
+#undef USE_HOST
+#undef USE_MAGMA
+#undef STEM
+#undef IMPL
+#undef USE_REAL
+#undef USE_COMPLEX
+#undef ARITH
+#undef REAL_ARITH
+#undef SUPPORTED_TYPE
+#undef REAL_PART
+#undef IMAGINARY_PART
+#undef ABS
+#undef CONJ
+#undef SET_ZERO
+#undef SET_COMPLEX
+#undef TO_COMPLEX
+#undef PLUS_EQUAL
+#undef MULT_EQUAL
+#undef TEMPLATE_PLEASE
+#undef STATIC
 
-/* Prototypes for Fortran-C interface */
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#define AS_FORTRAN(X) AS_FORTRANX(X)
-#define AS_FORTRANX(X) FORTRAN_FUNCTION(X ## _f77)
-
-void AS_FORTRAN(Sprimme)(REAL *evals, SCALAR *evecs,
-      REAL *rnorms, primme_params **primme, int *ierr);
-
-/* Only define these functions ones */
-#ifdef USE_DOUBLE
-void AS_FORTRAN(primme_initialize)(primme_params **primme);
-void AS_FORTRAN(primme_free)(primme_params **primme);
-void AS_FORTRAN(primme_display_params)(primme_params **primme);
-void AS_FORTRAN(primme_printstacktrace)(primme_params **primme);
-void AS_FORTRAN(primme_set_method)(primme_params **primme, primme_preset_method *method, int *returnValue);
-void AS_FORTRAN(primme_set_member)(primme_params **primme, int *label, void *ptr, int *ierr);
-void AS_FORTRAN(primme_get_prec_shift)(primme_params *primme, int *i, double *shift);
-void AS_FORTRAN(primme_get_member)(primme_params *primme, int *label, void *ptr, int *ierr);
-void AS_FORTRAN(primmetop_get_member)(primme_params **primme, int *label, void *ptr, int *ierr);
-void AS_FORTRAN(primmetop_get_prec_shift)(primme_params **primme, int *i, double *shift);
-#endif
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* PRIMME_F77_PRIVATE_H */
+#endif /* TEMPLATE_H */

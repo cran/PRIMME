@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, College of William & Mary
+ * Copyright (c) 2018, College of William & Mary
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,78 +34,33 @@
  *
  ******************************************************************************/
 
-#include <assert.h>
+#ifndef THIS_FILE
+#define THIS_FILE "../eigs/update_W.c"
+#endif
+
+
 #include "numerical.h"
+#include "template_normal.h"
+#include "common_eigs.h"
+/* Keep automatically generated headers under this section  */
+#ifndef CHECK_TEMPLATE
 #include "update_W.h"
 #include "auxiliary_eigs.h"
+#include "auxiliary_eigs_normal.h"
 #include "ortho.h"
-#include "wtime.h"
+#endif
 
-
-/*******************************************************************************
- * Subroutine matrixMatvec_ - Computes A*V(:,nv+1) through A*V(:,nv+blksze)
- *           where V(:,nv+1:nv+blksze) are the new correction vectors.
- *
- * INPUT ARRAYS AND PARAMETERS
- * ---------------------------
- * V          The orthonormal basis
- * nLocal     Number of rows of each vector stored on this node
- * ldV        The leading dimension of V
- * ldW        The leading dimension of W
- * basisSize  Number of vectors in V
- * blockSize  The current block size
- * 
- * INPUT/OUTPUT ARRAYS
- * -------------------
- * W          A*V
- ******************************************************************************/
-
-TEMPLATE_PLEASE
-int matrixMatvec_Sprimme(SCALAR *V, PRIMME_INT nLocal, PRIMME_INT ldV,
-      SCALAR *W, PRIMME_INT ldW, int basisSize, int blockSize,
-      primme_params *primme) {
-
-   int i, ONE=1, ierr=0;
-   double t0;
-
-   if (blockSize <= 0) return 0;
-
-   assert(ldV >= nLocal && ldW >= nLocal);
-   assert(primme->ldOPs == 0 || primme->ldOPs >= nLocal);
-
-   t0 = primme_wTimer(0);
-
-   /* W(:,c) = A*V(:,c) for c = basisSize:basisSize+blockSize-1 */
-   if (primme->ldOPs == 0 || (ldV == primme->ldOPs && ldW == primme->ldOPs)) {
-      CHKERRM((primme->matrixMatvec(&V[ldV*basisSize], &ldV, &W[ldW*basisSize],
-                  &ldW, &blockSize, primme, &ierr), ierr), -1,
-            "Error returned by 'matrixMatvec' %d", ierr);
-   }
-   else {
-      for (i=0; i<blockSize; i++) {
-         CHKERRM((primme->matrixMatvec(&V[ldV*(basisSize+i)], &primme->ldOPs,
-                     &W[ldW*(basisSize+i)], &primme->ldOPs, &ONE, primme,
-                     &ierr), ierr), -1,
-               "Error returned by 'matrixMatvec' %d", ierr);
-      }
-   }
-
-   primme->stats.timeMatvec += primme_wTimer(0) - t0;
-   primme->stats.numMatvecs += blockSize;
-
-   return ierr;
-
-}
+#ifdef SUPPORTED_TYPE
 
 /*******************************************************************************
- * Subroutine update_QR - Computes the QR factorization (A-targetShift*I)*V
+ * Subroutine update_QR - Computes the QR factorization (A-targetShift*B)*V
  *    updating only the columns nv:nv+blockSize-1 of Q and R.
  *
  * INPUT ARRAYS AND PARAMETERS
  * ---------------------------
- * V          The orthonormal basis
+ * BV         B*V
  * nLocal     Number of rows of each vector stored on this node
- * ldV        The leading dimension of V
+ * ldBV       The leading dimension of BV
  * W          A*V
  * ldW        The leading dimension of W
  * basisSize  Number of vectors in V
@@ -115,46 +70,46 @@ int matrixMatvec_Sprimme(SCALAR *V, PRIMME_INT nLocal, PRIMME_INT ldV,
  * -------------------
  * Q          The Q factor
  * R          The R factor
+ * QtQ        Q'Q
+ * fQtQ       The Cholesky factor of QtQ
  ******************************************************************************/
 
 TEMPLATE_PLEASE
-int update_Q_Sprimme(SCALAR *V, PRIMME_INT nLocal, PRIMME_INT ldV,
-      SCALAR *W, PRIMME_INT ldW, SCALAR *Q, PRIMME_INT ldQ, SCALAR *R, int ldR,
-      double targetShift, int basisSize, int blockSize, SCALAR *rwork,
-      size_t *rworkSize, double machEps, primme_params *primme) {
+int update_Q_Sprimme(SCALAR *BV, PRIMME_INT nLocal, PRIMME_INT ldBV, SCALAR *W,
+      PRIMME_INT ldW, SCALAR *Q, PRIMME_INT ldQ, HSCALAR *R, int ldR,
+      HSCALAR *QtQ, int ldQtQ, HSCALAR *fQtQ, int ldfQtQ, double targetShift,
+      int basisSize, int blockSize, int *nQ, primme_context ctx) {
 
-   int i, j;
-
-   /* Return memory requirement */
-   if (V == NULL) {
-      ortho_Sprimme(NULL, 0, NULL, 0, basisSize,
-         basisSize+blockSize-1, NULL, 0, 0, primme->nLocal, 
-         NULL, machEps, NULL, rworkSize, primme);
-      return 0;
-   }
+   int i;
 
    /* Quick exit */
 
-   if (blockSize <= 0 || Q == NULL || R == NULL) return 0;
+   if (blockSize <= 0 || R == NULL) return 0;
 
-   assert(ldV >= nLocal && ldW >= nLocal && ldQ >= nLocal && ldR >= basisSize+blockSize);   
+   assert(ldBV >= nLocal && ldW >= nLocal && ldQ >= nLocal &&
+          ldR >= basisSize + blockSize);
 
-   /* Q(:,c) = W(:,c) - V(:,c)*target for c = basisSize:basisSize+blockSize-1 */
-   for (i=basisSize; i<basisSize+blockSize; i++) {
-      Num_compute_residual_Sprimme(nLocal, targetShift, &V[ldV*i], &W[ldW*i],
-            &Q[ldQ*i]);
-   }
+   /* Q(:,c) = W(:,c) - BV(:,c)*target for c = basisSize:basisSize+blockSize-1 */
+
+   HEVAL *t;
+   CHKERR(KIND(Num_malloc_RHprimme, Num_malloc_SHprimme)(blockSize, &t, ctx));
+   for (i=0; i<blockSize; i++) t[i] = targetShift;
+   CHKERR(Num_compute_residuals_Sprimme(nLocal, blockSize, t,
+         &BV[ldBV * basisSize], ldBV, &W[ldW * basisSize], ldW,
+         &Q[ldQ * basisSize], ldQ, ctx));
+   CHKERR(KIND(Num_free_RHprimme, Num_free_SHprimme)(t, ctx));
 
    /* Ortho Q(:,c) for c = basisSize:basisSize+blockSize-1 */
-   CHKERR(ortho_Sprimme(Q, ldQ, R, ldR, basisSize, basisSize+blockSize-1, NULL,
-         0, 0, nLocal, primme->iseed, machEps, rwork, rworkSize, primme), -1);
 
-   /* Zero the lower triangular part of R */
-   for (i=basisSize; i<basisSize+blockSize; i++) {
-      for (j=i+1; j<ldR; j++) {
-         R[ldR*i+j] = 0.0;
-      }
-   }
+   CHKERR(ortho_block_Sprimme(Q, ldQ, QtQ, ldQtQ, fQtQ, ldfQtQ, R, ldR, *nQ,
+         *nQ + blockSize - 1, NULL, 0, 0, NULL, 0, nLocal,
+         ctx.primme->maxBasisSize, nQ, ctx));
+
+   /* Zero the lower-left part of R */
+
+   Num_zero_matrix_SHprimme(&R[basisSize], blockSize, basisSize, ldR, ctx);
 
    return 0;
 }
+
+#endif /* SUPPORTED_TYPE */

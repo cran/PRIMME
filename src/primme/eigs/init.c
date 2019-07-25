@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, College of William & Mary
+ * Copyright (c) 2018, College of William & Mary
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,22 +34,24 @@
  *  
  ******************************************************************************/
 
+#ifndef THIS_FILE
+#define THIS_FILE "../eigs/init.c"
+#endif
+
 #include <stdlib.h>
 #include <math.h>
 #include <assert.h>
 #include "numerical.h"
+/* Keep automatically generated headers under this section  */
+#ifndef CHECK_TEMPLATE
 #include "init.h"
-#include "update_projection.h"
 #include "update_W.h"
 #include "ortho.h"
 #include "factorize.h"
 #include "auxiliary_eigs.h"
-#include "wtime.h"                       /* Needed for CostModel */
+#endif
 
-static int init_block_krylov(SCALAR *V, PRIMME_INT nLocal, PRIMME_INT ldV,
-      SCALAR *W, PRIMME_INT ldW, int dv1, int dv2, SCALAR *locked,
-      PRIMME_INT ldlocked, int numLocked, double machEps, SCALAR *rwork,
-      size_t *rworkSize, primme_params *primme);
+#ifdef SUPPORTED_TYPE
 
 /*******************************************************************************
  * subroutine init_basis - This subroutine is used to 
@@ -82,13 +84,7 @@ static int init_block_krylov(SCALAR *V, PRIMME_INT nLocal, PRIMME_INT ldV,
  *
  * machEps    double machine precision
  * 
- * rwork      Double precision work array needed by other subroutines called
- *            by initialize_basis
- *
- * rworkSize  At most the maximum of (maximum size required by the 
- *            orthogonalization routine, maximum worksize by UDUDecompose)
- *
- * primme       Structure containing various solver parameters
+ * ctx          Structure containing various solver parameters
  * 
  * 
  * 
@@ -100,8 +96,6 @@ static int init_block_krylov(SCALAR *V, PRIMME_INT nLocal, PRIMME_INT ldV,
  *
  * *numGuesses  When locking is enabled, the number of remaining initial guesses
  * 
- * *timeForMV   Time estimate for applying the matvec operator.
- *              Measured only if primme.dynamicMethodSwitch is on.
  *
  * INPUT/OUTPUT ARRAYS AND PARAMETERS
  * ----------------------------------
@@ -109,14 +103,18 @@ static int init_block_krylov(SCALAR *V, PRIMME_INT nLocal, PRIMME_INT ldV,
  *
  * W            A*V
  *
- * evecsHat     K^{-1}*evecs, given a preconditioner K
+ * evecsHat     K^{-1}*B*evecs, given a preconditioner K
  *
  * M            evecs'*evecsHat.  Its dimension is as large as 
  *              (primme->numOrthoConst + primme->numEvals).
  *
- * UDU          The factorization of M
+ * Mfact        The factorization of M
  *
- * ipivot       The pivots of the UDU factorization
+ * ipivot       The pivots of the Mfact factorization
+ *
+ * VtBV         V'*B*V (used by Bortho_block)
+ *
+ * fVtBV        The Cholesky factor of VtBV (used by Bortho_block)
  *
  * Return value
  * ------------
@@ -124,31 +122,18 @@ static int init_block_krylov(SCALAR *V, PRIMME_INT nLocal, PRIMME_INT ldV,
  ******************************************************************************/
 
 TEMPLATE_PLEASE
-int init_basis_Sprimme(SCALAR *V, PRIMME_INT nLocal, PRIMME_INT ldV,
-      SCALAR *W, PRIMME_INT ldW, SCALAR *evecs, PRIMME_INT ldevecs,
-      SCALAR *evecsHat, PRIMME_INT ldevecsHat, SCALAR *M, int ldM, SCALAR *UDU,
-      int ldUDU, int *ipivot, double machEps, SCALAR *rwork, size_t *rworkSize,
-      int *basisSize, int *nextGuess, int *numGuesses, primme_params *primme) {
+int init_basis_Sprimme(SCALAR *V, PRIMME_INT nLocal, PRIMME_INT ldV, SCALAR *W,
+      PRIMME_INT ldW, SCALAR *BV, PRIMME_INT ldBV, SCALAR *evecs,
+      PRIMME_INT ldevecs, SCALAR *Bevecs, PRIMME_INT ldBevecs, SCALAR *evecsHat,
+      PRIMME_INT ldevecsHat, HSCALAR *M, int ldM, HSCALAR *Mfact, int ldMfact,
+      int *ipivot, HSCALAR *VtBV, int ldVtBV, HSCALAR *fVtBV, int ldfVtBV,
+      int maxRank, int *basisSize, int *nextGuess, int *numGuesses,
+      primme_context ctx) {
 
+   primme_params *primme = ctx.primme;
    int i;
    int initSize;
-   int random=0;
-
-   /* Return memory requirement */
-
-   if (V == NULL) {
-      update_projection_Sprimme(NULL, 0, NULL, 0, NULL, 0, nLocal,
-            0, primme->numOrthoConst, NULL, rworkSize, 1/*symmetric*/, primme);
-      UDUDecompose_Sprimme(NULL, 0, NULL, 0, NULL,
-            primme->numOrthoConst, NULL, rworkSize, primme);
-      ortho_Sprimme(NULL, 0, NULL, 0, 0, 
-            primme->numOrthoConst-1, NULL, 0, 0, nLocal, 
-            NULL, 0.0, NULL, rworkSize, primme);
-      ortho_Sprimme(NULL, 0, NULL, 0, 0, *basisSize-1, 
-            NULL, 0, primme->numOrthoConst, nLocal, 
-            NULL, 0.0, NULL, rworkSize, primme);
-      return 0;
-   }
+   int random = 0;
 
    /*-----------------------------------------------------------------------*/
    /* Orthogonalize the orthogonalization constraints provided by the user. */
@@ -157,81 +142,81 @@ int init_basis_Sprimme(SCALAR *V, PRIMME_INT nLocal, PRIMME_INT ldV,
    /*-----------------------------------------------------------------------*/
 
    if (primme->numOrthoConst > 0) {
-      CHKERR(ortho_Sprimme(evecs, ldevecs, NULL, 0, 0, 
-        primme->numOrthoConst - 1, NULL, 0, 0, nLocal, 
-        primme->iseed, machEps, rwork, rworkSize, primme), -1);
+      int nV;
+      CHKERR(Bortho_block_Sprimme(evecs, ldevecs, VtBV, ldVtBV, fVtBV, ldfVtBV,
+            NULL, 0, 0, primme->numOrthoConst - 1, NULL, 0, 0, Bevecs, ldBevecs,
+            NULL, 0, nLocal, maxRank, &nV, ctx));
+      CHKERRM(nV != primme->numOrthoConst, PRIMME_ORTHO_CONST_FAILURE,
+            "The given orthogonal constrains are not full rank");
 
-      /* Initialize evecsHat, M, and its factorization UDU,ipivot. This   */
+      /* Initialize evecsHat, M, and its factorization Mfact,ipivot. This */
       /* allows the orthogonalization constraints to be included in the   */
-      /* projector (I-QQ'). Only needed if there is preconditioning, and  */
+      /* projector (I-BQQ'). Only needed if there is preconditioning, and */
       /* JDqmr inner iterations with a right, skew projector. Only in     */
-      /* that case, is UDU not NULL                                       */
+      /* that case, M and Mfact are not NULL                              */
 
-      if (UDU != NULL) {
+      if (M != NULL) {
 
-         CHKERR(applyPreconditioner_Sprimme(evecs, primme->nLocal, ldevecs,
-                  evecsHat, ldevecsHat, primme->numOrthoConst, primme), -1);
+         primme->ShiftsForPreconditioner = NULL;
 
-         CHKERR(update_projection_Sprimme(evecs, ldevecs, evecsHat,
-                  ldevecsHat, M, ldM, nLocal, 0, primme->numOrthoConst, rwork,
-                  rworkSize, 1/*symmetric*/, primme), -1);
+         CHKERR(applyPreconditioner_Sprimme(Bevecs ? Bevecs : evecs,
+               primme->nLocal, Bevecs ? ldBevecs : ldevecs, evecsHat,
+               ldevecsHat, primme->numOrthoConst, ctx));
 
-         CHKERR(UDUDecompose_Sprimme(M, ldM, UDU, ldUDU, ipivot,
-                  primme->numOrthoConst, rwork, rworkSize, primme), -1);
+         CHKERR(update_XKinvBX_Sprimme(evecs, ldevecs, evecsHat, ldevecsHat, M,
+               ldM, 0, primme->numOrthoConst, Mfact, ldMfact, ipivot, ctx));
 
-      }  /* if evecsHat and M=evecs'evecsHat, UDU are needed */
+      } /* if evecsHat and M=evecs'evecsHat, UDU are needed */
 
-   }  /* if numOrthoCont >0 */
+   } /* if numOrthoCont >0 */
 
-
-   /* Handle case when some or all initial guesses are provided by */ 
+   /* Handle case when some or all initial guesses are provided by */
    /* the user                                                     */
    if (!primme->locking) {
       initSize = min(primme->maxBasisSize, primme->initSize);
-   }
-   else {
+   } else {
       initSize = min(primme->minRestartSize, primme->initSize);
    }
+   initSize = max(0, min(primme->n - primme->numOrthoConst, initSize));
    *numGuesses = primme->initSize - initSize;
    *nextGuess = primme->numOrthoConst + initSize;
 
    /* Copy over the initial guesses provided by the user */
-   Num_copy_matrix_Sprimme(&evecs[primme->numOrthoConst*ldevecs],
-         nLocal, initSize, ldevecs, V, ldV);
+   CHKERR(Num_copy_matrix_Sprimme(&evecs[primme->numOrthoConst * ldevecs],
+         nLocal, initSize, ldevecs, V, ldV, ctx));
 
-   switch(primme->initBasisMode) {
-   case primme_init_krylov:
-      random = 0;
-      break;
+   switch (primme->initBasisMode) {
+   case primme_init_krylov: random = 0; break;
    case primme_init_random:
-      random = max(0,primme->minRestartSize-initSize);
+      random = max(0, primme->minRestartSize - initSize);
       break;
    case primme_init_user:
-      random = max(primme->maxBlockSize-initSize, 0);
+      random = max(primme->maxBlockSize - initSize, 0);
       break;
-   default:
-      assert(0);
+   default: assert(0);
    }
-   for (i=0; i<random; i++) {
-      Num_larnv_Sprimme(2, primme->iseed, nLocal,
-            &V[ldV*(initSize+i)]);
+   random = max(0, min(primme->n - primme->numOrthoConst - initSize, random));
+   for (i = 0; i < random; i++) {
+      Num_larnv_Sprimme(
+            2, primme->iseed, nLocal, &V[ldV * (initSize + i)], ctx);
    }
    *basisSize = initSize + random;
 
-   /* Orthonormalize the guesses provided by the user */ 
-   CHKERR(ortho_Sprimme(V, ldV, NULL, 0, 0, *basisSize-1, 
-         evecs, ldevecs, primme->numOrthoConst, nLocal, 
-         primme->iseed, machEps, rwork, rworkSize, primme), -1)
+   /* Orthonormalize the guesses provided by the user */
+   CHKERR(Bortho_block_Sprimme(V, ldV, VtBV, ldVtBV, fVtBV, ldfVtBV, NULL, 0, 0,
+         *basisSize - 1, evecs, ldevecs, primme->numOrthoConst, BV, ldBV, NULL,
+         0, nLocal, maxRank, basisSize, ctx));
 
-   CHKERR(matrixMatvec_Sprimme(V, nLocal, ldV, W, ldW, 0, *basisSize,
-            primme), -1);
+   CHKERR(matrixMatvec_Sprimme(V, nLocal, ldV, W, ldW, 0, *basisSize, ctx));
 
    if (primme->initBasisMode == primme_init_krylov) {
-      CHKERR(init_block_krylov(V, nLocal, ldV, W, ldW, *basisSize,
-            primme->minRestartSize-1, evecs, ldevecs, primme->numOrthoConst,
-            machEps, rwork, rworkSize, primme), -1); 
+      int minRestartSize =
+            min(primme->minRestartSize, primme->n - primme->numOrthoConst);
+      CHKERR(init_block_krylov(V, nLocal, ldV, W, ldW, BV, ldBV, *basisSize,
+            minRestartSize - 1, evecs, ldevecs, primme->numOrthoConst, VtBV,
+            ldVtBV, fVtBV, ldfVtBV, maxRank, ctx));
 
-      *basisSize = primme->minRestartSize;
+      *basisSize = minRestartSize;
    }
 
    return 0;
@@ -252,16 +237,16 @@ int init_basis_Sprimme(SCALAR *V, PRIMME_INT nLocal, PRIMME_INT ldV,
  *
  * machEps     machine precision needed in ortho()
  *
- * rwork       Real work array
- *
- * rworkSize   Size of rwork array
- *
  * 
  * INPUT/OUTPUT ARRAYS
  * -------------------
  * V  The orthonormal basis
  * 
  * W  A*V
+ *
+ * VtBV         V'*B*V (used by Bortho_block)
+ *
+ * fVtBV        The Cholesky factor of VtBV (used by Bortho_block)
  *
  * Return value
  * ------------
@@ -270,17 +255,22 @@ int init_basis_Sprimme(SCALAR *V, PRIMME_INT nLocal, PRIMME_INT ldV,
  * 
  ******************************************************************************/
 
-static int init_block_krylov(SCALAR *V, PRIMME_INT nLocal, PRIMME_INT ldV,
-      SCALAR *W, PRIMME_INT ldW, int dv1, int dv2, SCALAR *locked,
-      PRIMME_INT ldlocked, int numLocked, double machEps, SCALAR *rwork,
-      size_t *rworkSize, primme_params *primme) {
+STATIC int init_block_krylov(SCALAR *V, PRIMME_INT nLocal, PRIMME_INT ldV,
+      SCALAR *W, PRIMME_INT ldW, SCALAR *BV, PRIMME_INT ldBV, int dv1, int dv2,
+      SCALAR *locked, PRIMME_INT ldlocked, int numLocked, HSCALAR *VtBV,
+      int ldVtBV, HSCALAR *fVtBV, int ldfVtBV, int maxRank, primme_context ctx) {
 
+   primme_params *primme = ctx.primme;
    int i;               /* Loop variables */
    int numNewVectors;   /* Number of vectors to be generated */
    int blockSize;       /* blockSize used in practice */
    
    numNewVectors = dv2 - dv1 + 1;
 
+   /* Quick exit */
+
+   if (numNewVectors <= 0) return 0;
+ 
    /*----------------------------------------------------------------------*/
    /* Generate a single Krylov space if there are only a few vectors to be */
    /* generated, else generate a block Krylov space with                   */
@@ -293,31 +283,43 @@ static int init_block_krylov(SCALAR *V, PRIMME_INT nLocal, PRIMME_INT ldV,
    /* Generate the initial vectors.                                        */
    /*----------------------------------------------------------------------*/
 
-   if (dv1+blockSize-1 <= dv2) {
-      for (i=dv1; i<dv1+blockSize; i++) {
-         Num_larnv_Sprimme(2, primme->iseed, nLocal, &V[ldV*i]);
-      }
+   for (i=dv1; i<dv1+blockSize; i++) {
+      CHKERR(Num_larnv_Sprimme(2, primme->iseed, nLocal, &V[ldV*i], ctx));
    }
-   CHKERR(ortho_Sprimme(V, ldV, NULL, 0, dv1, 
-            dv1+blockSize-1, locked, ldlocked, numLocked, 
-            nLocal, primme->iseed, machEps, rwork, rworkSize, primme), -1);
+   int nV=0;
+   CHKERR(Bortho_block_Sprimme(V, ldV, VtBV, ldVtBV, fVtBV, ldfVtBV, NULL, 0,
+         dv1, dv1 + blockSize - 1, locked, ldlocked, numLocked, BV, ldBV, NULL,
+         0, nLocal, maxRank, &nV, ctx));
+   CHKERRM(nV != dv1+blockSize, -1, "Random basis is not full rank");
 
    /* Generate the remaining vectors in the sequence */
 
-   for (i = dv1+blockSize; i <= dv2; i++) {
+   int m = blockSize;
+   for (i = dv1 + blockSize, m = min(m, dv2 - i + 1); i <= dv2;
+         i += m, m = min(m, dv2 - i + 1)) {
       CHKERR(matrixMatvec_Sprimme(&V[ldV*(i-blockSize)], nLocal, ldV,
-               &V[ldV*i], ldV, 0, 1, primme), -1);
+               &V[ldV*i], ldV, 0, m, ctx));
 
-      Num_copy_Sprimme(nLocal, &V[ldV*i], 1,
-         &W[ldW*(i-blockSize)], 1);
+      CHKERR(Num_copy_matrix_Sprimme(
+            &V[ldV * i], nLocal, m, ldV, &W[ldW * (i - blockSize)], ldW, ctx));
 
-      CHKERR(ortho_Sprimme(V, ldV, NULL, 0, i, i, locked, 
-               ldlocked, numLocked, nLocal, primme->iseed, machEps,
-               rwork, rworkSize, primme), -1);
+      CHKERR(Bortho_block_Sprimme(V, ldV, VtBV, ldVtBV, fVtBV, ldfVtBV, NULL, 0,
+            i, i + m - 1, locked, ldlocked, numLocked, BV, ldBV, NULL, 0,
+            nLocal, maxRank, &nV, ctx));
+      int j;
+      for (j = nV; j < i + m; j++) {
+         Num_larnv_Sprimme(2, primme->iseed, nLocal, &V[ldV * j], ctx);
+      }
+      CHKERR(Bortho_block_Sprimme(V, ldV, VtBV, ldVtBV, fVtBV, ldfVtBV, NULL, 0,
+            nV, i + m - 1, locked, ldlocked, numLocked, BV, ldBV, NULL, 0,
+            nLocal, maxRank, &nV, ctx));
+      CHKERRM(nV != i+m, -1, "Random basis in not full rank");
    }
 
    CHKERR(matrixMatvec_Sprimme(V, nLocal, ldV, W, ldW, dv2-blockSize+1,
-            blockSize, primme), -1);
+            blockSize, ctx));
 
    return 0;
 }
+
+#endif /* SUPPORTED_TYPE */

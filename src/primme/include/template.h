@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, College of William & Mary
+ * Copyright (c) 2018, College of William & Mary
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,81 +30,152 @@
  * File: template.h
  *
  * Purpose - Contains definitions of macros used along PRIMME.
+ *    In short source files, *.c, are compiled several times, every time for a
+ *    different type, referred as SCALAR. Examples of types are float, double,
+ *    complex float, complex double, and the corresponding GPU versions. All
+ *    types are described in section "Arithmetic". Other macros are defined to
+ *    refer derived types and functions. An example is REAL, which is
+ *    defined as the real (non-complex) version of SCALAR. For instance,
+ *    when SCALAR is complex double, REAL is double. Similarly, it is possible
+ *    to call the real version of a function. For instance,
+ *    permute_vecs_Sprimme permutes vectors with type SCALAR and
+ *    permute_vecs_Rprimme permutes vectors with type REAL.
+ *
+ *    When SCALAR is a GPU type, the pointers SCALAR* are supposed to point out
+ *    memory allocated on GPUs, also called devices. For instance,
+ *    Num_malloc_Sprimme allocates GPU memory when SCALAR is a GPU type. Use
+ *    HSCALAR and HREAL as the non-GPU, also called host, versions of SCALAR and
+ *    REAL. Also to use the non-GPU version use the suffices _SHprimme and
+ *    _RHprimme. For instance,
+ *    Num_malloc_SHprimme allocates memory on the host, and
+ *    permute_vecs_RHprimme permute REAL vectors on the host.
  *
  ******************************************************************************/
 
 #ifndef TEMPLATE_H
 #define TEMPLATE_H
 
-#include <limits.h>    
-#include <float.h>
-#include <stdint.h>
-#include "primme.h"
-
-/*****************************************************************************/
-/* Arithmetic                                                                */
-/*****************************************************************************/
+#include "template_types.h"
 
 /**********************************************************************
  * Macros USE_FLOAT, USE_FLOATCOMPLEX, USE_DOUBLE and USE_DOUBLECOMPLEX -
  *    only one of them is defined at the same time, and identifies the
  *    type of SCALAR, one of float, complex float, double or complex double.
  *
- * Macro SCALAR - type of the matrices problem and the eigenvectors.
- *
- * Macro REAL - type of the real part of SCALAR, and the type of the
- *    eigenvalues.
- *
- * Macro SCALAR_PRE - prefix used in Xprimme C interface function (dprimme,
- *    zprimme...) and in BLAS/LAPACK functions.
- *
- * Macro REAL_PRE - prefix used in BLAS/LAPACK functions.
- *
- * Macro SCALAR_SUF - suffix appended in functions whose prototypes have
- *    SCALAR and REAL arguments and is called from other files.
- *
- * Macro REAL_SUF - suffix appended to call the REAL version of the
- *    function.
- *
  * Macro USE_COMPLEX - only defined when SCALAR is a complex type.
+ *
+ * Macro USE_HOST - CPU version
+ *
+ * Macro USE_MAGMA - MAGMA version
+ *
+ * Macro SUPPORTED_TYPE - defined if functions with the current type
+ *    are going to be built.
+ *
+ * Macro SUPPORTED_HALF_TYPE - defined if functions with the current type
+ *    has a version in half.
  **********************************************************************/
 
-#if defined(USE_DOUBLE)
-#  define SCALAR_PRE d
-#  define REAL_PRE d
-#  define SCALAR_SUF dprimme
-#  define REAL_SUF dprimme
-#  define SCALAR double
-#  define REAL double
-#  define MACHINE_EPSILON DBL_EPSILON
-#elif defined(USE_DOUBLECOMPLEX)
-#  define SCALAR_PRE z
-#  define REAL_PRE d
-#  define SCALAR_SUF zprimme
-#  define REAL_SUF dprimme
-#  define USE_COMPLEX
-#  define SCALAR PRIMME_COMPLEX_DOUBLE
-#  define REAL double
-#  define MACHINE_EPSILON DBL_EPSILON
-#elif defined(USE_FLOAT)
-#  define SCALAR_PRE s
-#  define REAL_PRE s
-#  define SCALAR_SUF sprimme
-#  define REAL_SUF sprimme
-#  define SCALAR float
-#  define REAL float
-#  define MACHINE_EPSILON FLT_EPSILON
-#elif defined(USE_FLOATCOMPLEX)
-#  define SCALAR_PRE c
-#  define REAL_PRE s
-#  define SCALAR_SUF cprimme
-#  define REAL_SUF sprimme
-#  define USE_COMPLEX
-#  define SCALAR PRIMME_COMPLEX_FLOAT
-#  define REAL float
-#  define MACHINE_EPSILON FLT_EPSILON
+/* Helper macros and types used to define SCALAR and REAL and their variants */
+
+#define HOST_STEM
+
+#if defined(USE_HALF) || defined(USE_HALFCOMPLEX) || defined(USE_FLOAT) ||     \
+      defined(USE_FLOATCOMPLEX) || defined(USE_DOUBLE) ||                      \
+      defined(USE_DOUBLECOMPLEX)
+#  define USE_HOST
+#  define STEM
+#  define IMPL(BL, MA) BL
+#elif defined(USE_FLOAT_MAGMA) || defined(USE_FLOATCOMPLEX_MAGMA) ||           \
+      defined(USE_DOUBLE_MAGMA) || defined(USE_DOUBLECOMPLEX_MAGMA) ||         \
+      defined(USE_HALF_MAGMA) || defined(USE_HALFCOMPLEX_MAGMA)
+#  define USE_MAGMA
+#  define STEM magma_
+#  define IMPL(BL, MA) MA
 #else
-#  error "An arithmetic should be selected, please define one of USE_DOUBLE, USE_DOUBLECOMPLEX, USE_FLOAT or USE_FLOATCOMPLEX."
+#  error 
+#endif
+
+#if !defined(CHECK_TEMPLATE) && !defined(STEM_C)
+#   define STEM_C STEM
+#endif
+
+#if defined(USE_HALF) || defined(USE_HALF_MAGMA) || defined(USE_FLOAT) ||      \
+      defined(USE_FLOAT_MAGMA) || defined(USE_DOUBLE) ||                       \
+      defined(USE_DOUBLE_MAGMA) || defined(USE_QUAD) ||                        \
+      defined(USE_QUAD_MAGMA)
+#  define USE_REAL
+#elif defined(USE_HALFCOMPLEX) || defined(USE_HALFCOMPLEX_MAGMA) ||            \
+      defined(USE_FLOATCOMPLEX) || defined(USE_FLOATCOMPLEX_MAGMA) ||          \
+      defined(USE_DOUBLECOMPLEX) || defined(USE_DOUBLECOMPLEX_MAGMA) ||        \
+      defined(USE_QUADCOMPLEX) || defined(USE_QUADCOMPLEX_MAGMA)
+#  define USE_COMPLEX
+#else
+#  error 
+#endif
+
+#if   defined(USE_DOUBLE)        || defined(USE_DOUBLE_MAGMA)
+#  define      ARITH(H,K,S,C,D,Z,Q,W) D
+#  define REAL_ARITH(H,K,S,C,D,Z,Q,W) D
+#elif defined(USE_DOUBLECOMPLEX) || defined(USE_DOUBLECOMPLEX_MAGMA)
+#  define      ARITH(H,K,S,C,D,Z,Q,W) Z
+#  define REAL_ARITH(H,K,S,C,D,Z,Q,W) D
+#elif defined(USE_FLOAT)         || defined(USE_FLOAT_MAGMA)          
+#  define      ARITH(H,K,S,C,D,Z,Q,W) S
+#  define REAL_ARITH(H,K,S,C,D,Z,Q,W) S
+#elif defined(USE_FLOATCOMPLEX)  || defined(USE_FLOATCOMPLEX_MAGMA)          
+#  define      ARITH(H,K,S,C,D,Z,Q,W) C
+#  define REAL_ARITH(H,K,S,C,D,Z,Q,W) S
+#elif defined(USE_HALF)          || defined(USE_HALF_MAGMA)          
+#  define      ARITH(H,K,S,C,D,Z,Q,W) H
+#  define REAL_ARITH(H,K,S,C,D,Z,Q,W) H
+#elif defined(USE_HALFCOMPLEX)   || defined(USE_HALFCOMPLEX_MAGMA)          
+#  define      ARITH(H,K,S,C,D,Z,Q,W) K
+#  define REAL_ARITH(H,K,S,C,D,Z,Q,W) H
+#elif defined(USE_QUAD)          || defined(USE_QUAD_MAGMA)          
+#  define      ARITH(H,K,S,C,D,Z,Q,W) Q
+#  define REAL_ARITH(H,K,S,C,D,Z,Q,W) Q
+#elif defined(USE_QUADCOMPLEX)   || defined(USE_QUADCOMPLEX_MAGMA)          
+#  define      ARITH(H,K,S,C,D,Z,Q,W) W
+#  define REAL_ARITH(H,K,S,C,D,Z,Q,W) Q
+#else
+#  error
+#endif
+
+/* For host types, define SUPPORTED_HALF_TYPE when the compiler supports half
+ * precision. For MAGMA, define the macro if MAGMA also supports half precision.
+ *
+ * Define SUPPORTED_TYPE when inspecting the signature functions to generate
+ * the signature for all possible functions. Also define the macro for any
+ * setting without half precision, and for half precision if the compiler
+ * supports half precision.
+ */
+
+#if defined(PRIMME_WITH_HALF) && defined(PRIMME_WITH_NATIVE_HALF) &&           \
+      (defined(USE_HOST) ||                                                    \
+            (defined(PRIMME_WITH_MAGMA) && defined(USE_MAGMA) &&               \
+                  defined(MAGMA_WITH_HALF)))
+#  define SUPPORTED_HALF_TYPE
+#endif
+
+// Undefine SUPPORTED_TYPE when the current type is not supported. That is if
+// one the next applies:
+// - USE_HALF/COMPLEX/_MAGMA is defined but SUPPORTED_HALF_TYPE is not.
+// - USE_FLOAT/COMPLEX/_MAGMA is defined but PRIMME_WITHOUT_FLOAT is defined.
+// - USE_MAGMA is defined but PRIMME_WITH_MAGMA is not.
+
+#define SUPPORTED_TYPE
+#if !defined(CHECK_TEMPLATE) &&                                                \
+      (((defined(USE_HALF) || defined(USE_HALFCOMPLEX) ||                      \
+              defined(USE_HALF_MAGMA) || defined(USE_HALFCOMPLEX_MAGMA)) &&    \
+             !defined(SUPPORTED_HALF_TYPE)) ||                                 \
+            ((defined(USE_HALF_MAGMA) || defined(USE_HALFCOMPLEX_MAGMA)) &&    \
+                  !defined(MAGMA_WITH_HALF)) ||                                \
+            (defined(USE_MAGMA) && !defined(PRIMME_WITH_MAGMA)) ||             \
+            ((defined(USE_FLOAT) || defined(USE_FLOATCOMPLEX) ||               \
+                   defined(USE_FLOAT_MAGMA) ||                                 \
+                   defined(USE_FLOATCOMPLEX_MAGMA)) &&                         \
+                  defined(PRIMME_WITHOUT_FLOAT)))
+#  undef SUPPORTED_TYPE
 #endif
 
 /* A C99 code with complex type is not a valid C++ code. However C++          */
@@ -116,338 +187,119 @@
 #ifdef USE_COMPLEX
 #  ifndef __cplusplus
 #     define REAL_PART(x) (creal(x))
+#     define IMAGINARY_PART(x) (cimag(x))
 #     define ABS(x) (cabs(x))
 #     define CONJ(x) (conj(x))
 #  else
 #     define REAL_PART(x) (std::real(x))
+#     define IMAGINARY_PART(x) (std::imag(x))
 #     define ABS(x) (std::abs(x))
 #     define CONJ(x) (std::conj(x))
 #  endif
 #else
 #  define REAL_PART(x) (x)
+#  define IMAGINARY_PART(x) 0
 #  define ABS(x) (fabs(x))
 #  define CONJ(x) (x)
 #endif
 
-/* complex.h may be defined in primme.h or here; so undefine I */
-#ifdef I
-#   undef I
-#endif
+/* Helper macros to support complex arithmetic for types without complex   */
+/* support in C99. For now, only half precision has this problem. The      */
+/* approach is to cast the unsupported complex type to a supported type    */
+/* with more precision. For instance, complex half precision is cast to    */
+/* complex single precision.                                               */
+/*                                                                         */
+/* NOTE: 'A' is an unsupported complex type and 'B' is a supported type    */
+/* SET_ZERO(A)       : set A = 0                                           */
+/* SET_COMPLEX(A, B) : set A = B                                           */
+/* TO_COMPLEX(A)     : cast A to a supported complex type                  */
+/* PLUS_EQUAL(A, B)  : set A += B                                          */
+/* MULT_EQUAL(A, B)  : set A *= B                                          */
 
-#ifndef __cplusplus
-#include <tgmath.h>   /* select proper function abs from fabs, cabs... */
-#endif
-
-#ifndef __cplusplus
-#  define ISFINITE isfinite
+#if (defined(USE_HALFCOMPLEX) || defined(USE_HALFCOMPLEX_MAGMA)) && !defined(PRIMME_WITH_NATIVE_COMPLEX_HALF)
+#  define SET_ZERO(A) {(A).r = 0; (A).i = 0;}
+#  define SET_COMPLEX(A,B) {(A).r = REAL_PART(B); (A).i = IMAGINARY_PART(B);}
+#  ifndef __cplusplus
+#     define TO_COMPLEX(A) ((A).r + (A).i * _Complex_I)
+#  else
+#     define TO_COMPLEX(A) (std::complex<HREAL>((HREAL)((A).r), (HREAL)((A).i)))
+#  endif
+#  define PLUS_EQUAL(A,B) {(A).r += REAL_PART(B); (A).i += IMAGINARY_PART(B);}
+#  define MULT_EQUAL(A, B)                                                     \
+   {                                                                           \
+      HSCALAR C = TO_COMPLEX(A) * (B);                                         \
+      (A).r += REAL_PART(C);                                                   \
+      (A).i += IMAGINARY_PART(C);                                              \
+   }
 #else
-#  define ISFINITE std::isfinite
+#  define SET_ZERO(A) {(A) = 0.0;}
+#  define SET_COMPLEX(A,B) (A) = (B)
+#  if defined(USE_HALFCOMPLEX) && defined(__cplusplus)
+#     define TO_COMPLEX(A) (HSCALAR(REAL_PART(A), IMAGINARY_PART(A)))
+#     define PLUS_EQUAL(A, B) (A) = TO_COMPLEX(A) + (B)
+#     define MULT_EQUAL(A, B) (A) = TO_COMPLEX(A) * (B)
+#  else
+#     define TO_COMPLEX(A) (A)
+#     define PLUS_EQUAL(A, B) (A) += (B)
+#     define MULT_EQUAL(A, B) (A) *= (B)
+#  endif
 #endif
+
 
 /* TEMPLATE_PLEASE tags the functions whose prototypes depends on macros and  */
 /* are used in other files. The macro has value only when the tool ctemplate  */
-/* will inspect the source files, which happens when the macro CHECK_TEMPLATE */
-/* is defined. See Makefile and tools/ctemplate.                              */
+/* is inspecting the source files, which is indicated by the macro            */
+/* CHECK_TEMPLATE being defined. See Makefile and tools/ctemplate.            */
 /*                                                                            */
-/* When SCALAR is not a complex type (e.g., float and double) the function it */
+/* When SCALAR is not a complex type (e.g., float and double) the function    */
 /* will be referred as _Sprimme and _Rprimme. Otherwise it will be referred   */
 /* only as _Sprimme. The term TEMPLATE_PLEASE should prefix every function    */
 /* that will be instantiated with different values for SCALAR and REAL.       */
 
+#ifndef TEMPLATE_H_PRIVATE
+#define TEMPLATE_H_PRIVATE
+
+#  define USE_ARITH(Re,Co) ARITH(Re,Co,Re,Co,Re,Co,Re,Co)
+
+#  define USE_SR(Re,Co,T,XH,STEM,POST) \
+      USE(CONCAT(CONCAT(CONCAT(S,XH),T),primme), STR0(CONCAT(CONCAT(CONCAT(STEM,USE_ARITH(Re,Co)),primme),POST))) \
+      USE(CONCAT(CONCAT(CONCAT(R,XH),T),primme), STR0(CONCAT(CONCAT(CONCAT(STEM,Re),primme),POST)))
+
+#  define USE_TYPE(H,K,S,C,D,Z,Q,W,XH,STEM,POST)  \
+      USE_SR(H,K,h,XH,STEM,POST) \
+      USE_SR(S,C,s,XH,STEM,POST) \
+      USE_SR(D,Z,d,XH,STEM,POST) \
+      USE_SR(Q,W,q,XH,STEM,POST)
+
+#endif /* TEMPLATE_H_PRIVATE */
+
 #ifdef CHECK_TEMPLATE
-#  ifdef USE_DOUBLE
-#     define TEMPLATE_PLEASE \
-        APPEND_FUNC(Sprimme,SCALAR_SUF) USE(Sprimme,"SCALAR_SUF") USE(Rprimme,"REAL_SUF")
-#  else
-#     define TEMPLATE_PLEASE \
-        APPEND_FUNC(Sprimme,SCALAR_SUF)
-#  endif
-   /* Avoid to use the final type for integers and complex in generated       */
-   /* headers file. Instead use PRIMME_COMPLEX_FLOAT and _DOUBLE.             */
-#  undef PRIMME_COMPLEX_FLOAT
-#  undef PRIMME_COMPLEX_DOUBLE
-#  undef PRIMME_INT
+#  define TEMPLATE_PLEASE \
+      APPEND_FUNC(Sprimme,SCALAR_SUF) USE(Sprimme,"SCALAR_SUF") \
+      USE(Rprimme,"REAL_SUF") USE(SHprimme,"HOST_SCALAR_SUF") \
+      USE(RHprimme,"HOST_REAL_SUF") USE(SXprimme,"XSCALAR_SUF") \
+      USE(RXprimme,"XREAL_SUF") USE_TYPE(h,k,s,c,d,z,q,w, , STEM_C, ) \
+      USE_TYPE(h,k,s,c,d,z,q,w, X, HOST_STEM, ) \
+      USE_TYPE(s,c,s,c,d,z,q,w, H, HOST_STEM, )
+
+#  define STATIC APPEND_FUNC(,SCALAR_SUF) USE(,"SCALAR_SUF")
+
 #else
 #  define TEMPLATE_PLEASE
-#endif
+#  define STATIC
+#endif /* CHECK_TEMPLATE */
 
-/*****************************************************************************/
-/* Error management                                                          */
-/*****************************************************************************/
+/* Avoid to use the final type for integers and complex in generated       */
+/* headers file. Instead use PRIMME_COMPLEX_FLOAT, _HALF and _DOUBLE.      */
 
-/* The error code is checked with an assert. Then by default the code will   */
-/* abort in case of error, unless it is compiled with the macro NDEBUG       */
-/* defined. In that case it is printed out the file and the line in the      */
-/* source that caused the error in the file descriptor primme->outputFile    */
-/* or primme_svds->outputFile. Use CHKERR and CHKERRM in functions that has  */
-/* primme_params* primme, and CHKERRS and CHKERRMS in functions that has     */
-/* primme_svds_params* primme_svds.                                          */
+#ifdef CHECK_TEMPLATE
+#  undef PRIMME_HALF
+#  undef PRIMME_COMPLEX_HALF
+#  undef PRIMME_COMPLEX_FLOAT
+#  undef PRIMME_COMPLEX_DOUBLE
+#  undef PRIMME_QUAD
+#  undef PRIMME_COMPLEX_QUAD
+#  undef PRIMME_INT
+#endif /* CHECK_TEMPLATE */
 
-#include <assert.h>
-
-/**********************************************************************
- * Macro CHKERR - assert that ERRN == 0. If not it is printed out in
- *    primme->outputFile the file and the line of the caller, and
- *    force the caller function to return RETURN.
- *
- *    ERRN is only evaluated once.
- *
- * INPUT PARAMETERS
- * ----------------
- * ERRN    Expression that returns an error code
- * RETURN  Value that the caller function will return in case of error
- *
- **********************************************************************/
-
-#define CHKERR(ERRN, RETURN) { \
-   int __err = (ERRN); assert(__err==0);\
-   if (__err) {\
-      if (primme->printLevel > 0 && primme->outputFile) \
-         fprintf(primme->outputFile, "PRIMME: Error %d in (" __FILE__ ":%d): %s\n", __err, __LINE__, #ERRN );\
-      return (RETURN);\
-   }\
-}
-
-/**********************************************************************
- * Macro CHKERRNOABORT - If ERRN != 0, it is printed out in
- *    primme->outputFile the file and the line of the caller, and
- *    force the caller function to return RETURN.
- *
- *    ERRN is only evaluated once.
- *
- * INPUT PARAMETERS
- * ----------------
- * ERRN    Expression that returns an error code
- * RETURN  Value that the caller function will return in case of error
- *
- **********************************************************************/
-
-#define CHKERRNOABORT(ERRN, RETURN) { \
-   int __err = (ERRN);\
-   if (__err) {\
-      if (primme->printLevel > 0 && primme->outputFile) \
-         fprintf(primme->outputFile, "PRIMME: Error %d in (" __FILE__ ":%d): %s\n", __err, __LINE__, #ERRN );\
-      return (RETURN);\
-   }\
-}
-
-/**********************************************************************
- * Macro CHKERRM - assert that ERRN == 0. If not it is printed out in
- *    primme->outputFile the file and the line of the caller, in
- *    addition to an error message passed as arguments. As CHKERR
- *    the caller function is forced to return RETURN in case of error.
- *
- *    ERRN is only evaluated once.
- *
- * INPUT PARAMETERS
- * ----------------
- * ERRN    Expression that returns an error code
- * RETURN  Value that the caller function will return in case of error
- *
- * EXAMPLE
- * -------
- *   CHKERRM((ptr = malloc(n*sizeof(double))) == NULL, -1,
- *        "malloc could not allocate %d doubles\n", n);
- *
- **********************************************************************/
-
-#define CHKERRM(ERRN, RETURN, ...) { \
-   int __err = (ERRN); assert(__err==0);\
-   if (__err) {\
-      if (primme->printLevel > 0 && primme->outputFile) {\
-         fprintf(primme->outputFile, "PRIMME: Error %d in (" __FILE__ ":%d): %s\n", __err, __LINE__, #ERRN );\
-         fprintf(primme->outputFile, "PRIMME: " __VA_ARGS__);\
-         fprintf(primme->outputFile, "\n");\
-      }\
-      return (RETURN);\
-   }\
-}
-
-/**********************************************************************
- * Macro CHKERRNOABORTM - If ERRN == 0, it is printed out in
- *    primme->outputFile the file and the line of the caller, in
- *    addition to an error message passed as arguments. As CHKERR
- *    the caller function is forced to return RETURN in case of error.
- *
- *    ERRN is only evaluated once.
- *
- * INPUT PARAMETERS
- * ----------------
- * ERRN    Expression that returns an error code
- * RETURN  Value that the caller function will return in case of error
- *
- * EXAMPLE
- * -------
- *   CHKERRNOABORTM((ptr = malloc(n*sizeof(double))) == NULL, -1,
- *        "malloc could not allocate %d doubles\n", n);
- *
- **********************************************************************/
-
-#define CHKERRNOABORTM(ERRN, RETURN, ...) { \
-   int __err = (ERRN);\
-   if (__err) {\
-      if (primme->printLevel > 0 && primme->outputFile) {\
-         fprintf(primme->outputFile, "PRIMME: Error %d in (" __FILE__ ":%d): %s\n", __err, __LINE__, #ERRN );\
-         fprintf(primme->outputFile, "PRIMME: " __VA_ARGS__);\
-         fprintf(primme->outputFile, "\n");\
-      }\
-      return (RETURN);\
-   }\
-}
-
-/**********************************************************************
- * Macro CHKERRS - assert that ERRN == 0. If not it is printed out in
- *    primme_svds->outputFile the file and the line of the caller, and
- *    force the caller function to return RETURN.
- *
- *    ERRN is only evaluated once.
- *
- * INPUT PARAMETERS
- * ----------------
- * ERRN    Expression that returns an error code
- * RETURN  Value that the caller function will return in case of error
- *
- **********************************************************************/
-
-#define CHKERRS(ERRN, RETURN) { \
-   int __err = (ERRN); assert(__err==0);\
-   if (__err) {\
-      if (primme_svds->printLevel > 0 && primme_svds->outputFile) {\
-         fprintf(primme_svds->outputFile, "PRIMME: Error %d in (" __FILE__ ":%d): %s\n", __err, __LINE__, #ERRN );\
-      }\
-      return (RETURN);\
-   }\
-}
-
-/**********************************************************************
- * Macro CHKERRMS - assert that ERRN == 0. If not it is printed out in
- *    primme->outputFile the file and the line of the caller, in
- *    addition to an error message passed as arguments. As CHKERRS
- *    the caller function is forced to return RETURN in case of error.
- *
- *    ERRN is only evaluated once.
- *
- * INPUT PARAMETERS
- * ----------------
- * ERRN    Expression that returns an error code
- * RETURN  Value that the caller function will return in case of error
- *
- * EXAMPLE
- * -------
- *   CHKERRMS((ptr = malloc(n*sizeof(double))) == NULL, -1,
- *        "malloc could not allocate %d doubles\n", n);
- *
- **********************************************************************/
-
-#define CHKERRMS(ERRN, RETURN, ...) { \
-   int __err = (ERRN); assert(__err==0);\
-   if (__err) {\
-      if (primme_svds->printLevel > 0 && primme_svds->outputFile) {\
-         fprintf(primme_svds->outputFile, "PRIMME: Error %d in (" __FILE__ ":%d): %s\n", __err, __LINE__, #ERRN );\
-         fprintf(primme_svds->outputFile, "PRIMME: " __VA_ARGS__);\
-         fprintf(primme_svds->outputFile, "\n");\
-      }\
-      return (RETURN);\
-   }\
-}
-
-/*****************************************************************************/
-/* Memory management                                                         */
-/*****************************************************************************/
-
-/**********************************************************************
- * Macro MALLOC_PRIMME - malloc NELEM of type **X and write down the
- *    pointer in *X.
- *
- * INPUT PARAMETERS
- * ----------------
- * NELEM   Number of sizeof(**X) to allocate
- * X       Where to store the pointer
- *
- * RETURN VALUE
- * ------------
- * error code
- *
- * EXAMPLE
- * -------
- *   double *values;
- *   CHKERRM(MALLOC_PRIMME(n, &values), -1,
- *        "malloc could not allocate %d doubles\n", n);
- *
- **********************************************************************/
-
-#if !(defined (__APPLE__) && defined (__MACH__))
-#  include <malloc.h> /* malloc */
-#endif
-#include <stdlib.h>   /* malloc, free */
-
-#define MALLOC_PRIMME(NELEM, X) (*((void**)X) = malloc((NELEM)*sizeof(**(X))), *(X) == NULL)
-
-
-/**********************************************************************
- * Macro WRKSP_MALLOC_PRIMME - borrow NELEM of type **X from workspace *rwork;
- *    on return *X is an aligned pointer to the borrowed space and workspace
- *    *rwork points to the first free address.
- *
- * INPUT/OUTPUT PARAMETERS
- * -----------------------
- * NELEM   Number of sizeof(**X) to allocate
- * X       Where to store the pointer of the borrowed space
- * RWORK   Reference to the workspace from take space; *RWORK is updated
- *         with the first free address
- * LRWORK  Reference to the number of elements in *RWORK; *LRWORK is updated
- *         with the left number of elements in *RWORK
- *
- * RETURN VALUE
- * ------------
- * error code
- *
- * EXAMPLE
- * -------
- *   double *values, *rwork; size_t *rworkSize;
- *   CHKERR(WRKSP_MALLOC_PRIMME(n, &values, &rwork, &rworkSize), -1);
- *
- **********************************************************************/
-
-#define WRKSP_MALLOC_PRIMME(NELEM, X, RWORK, LRWORK) (\
-      *(uintptr_t*)(X) = ALIGN_BY_SIZE(*(RWORK), sizeof(**(X))), \
-      *(uintptr_t*)(RWORK) = ALIGN_BY_SIZE(*(X)+(NELEM), sizeof(**(RWORK))), \
-      /* Check that there are enough elements in *RWORK */ \
-      /* NOTE: the check is pessimistic */ \
-      (sizeof(**(X))*((NELEM)+1) + sizeof(**(RWORK)) - 2 \
-        <= *(LRWORK)*sizeof(**(RWORK))) \
-        /* If there is, subtract the used number of elements */ \
-        ? (*(LRWORK) -= (sizeof(**(X))*((NELEM)+1) + sizeof(**(RWORK)) - 2) \
-                           / sizeof(**(RWORK)), 0 /* return success */)\
-        /* Else, return error */ \
-        : -1)
-
-#define ALIGN_BY_SIZE(ptr,size_of_T) (((uintptr_t)(ptr)+(size_of_T)-1) & -(size_of_T))
-
-#define ALIGN(ptr, T) (T*) ALIGN_BY_SIZE(ptr, sizeof(T))
-
-
-/*****************************************************************************/
-/* Miscellanea                                                               */
-/*****************************************************************************/
-
-/* Used by macros emitted by ctemplate */
-#define CONCAT(a, b) CONCATX(a, b)
-#define CONCATX(a, b) a ## b
-
-#define TO_INT(X) ((X) < INT_MAX ? (X) : INT_MAX)
-
-#ifdef F77UNDERSCORE
-#define FORTRAN_FUNCTION(X) CONCAT(X,_)
-#else
-#define FORTRAN_FUNCTION(X) X
-#endif
-
-#ifndef max
-#  define max(a, b) ((a) > (b) ? (a) : (b))
-#endif
-#ifndef min
-#  define min(a, b) ((a) < (b) ? (a) : (b))
-#endif
-
-#endif
+#endif /* TEMPLATE_H */

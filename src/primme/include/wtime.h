@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, College of William & Mary
+ * Copyright (c) 2018, College of William & Mary
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,11 +40,7 @@
 extern "C" {
 #endif
 
-double primme_wTimer(int zeroTimer);
-extern double primme_get_wtime(void);
-#if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
-double primme_get_time(double *, double *);
-#endif
+double primme_wTimer();
 
 #ifdef __cplusplus
 }

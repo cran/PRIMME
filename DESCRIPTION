@@ -1,8 +1,8 @@
 Package: PRIMME
 Type: Package
 Title: Eigenvalues and Singular Values and Vectors from Large Matrices
-Version: 2.2-0
-Date: 2018-01-12
+Version: 3.0-0
+Date: 2019-07-25
 Authors@R: c(person("Eloy", "Romero", role=c("aut", "cre"), email="eloy@cs.wm.edu"),
              person("Andreas", "Stathopoulos", role="aut", email="andreas@cs.wm.edu"),
              person("College of William & Mary", role="cph"))
@@ -23,10 +23,10 @@ SystemRequirements: A POSIX system. Currently Linux and OS X are known
 NeedsCompilation: yes
 License: GPL-3
 Encoding: UTF-8
-RoxygenNote: 6.0.1
-Packaged: 2018-01-12 23:13:56 UTC; eloy
+RoxygenNote: 6.1.1
+Packaged: 2019-07-25 09:35:22 UTC; eloy
 Author: Eloy Romero [aut, cre],
   Andreas Stathopoulos [aut],
   College of William & Mary [cph]
 Repository: CRAN
-Date/Publication: 2018-01-12 23:26:42 UTC
+Date/Publication: 2019-07-25 09:50:02 UTC

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, College of William & Mary
+ * Copyright (c) 2018, College of William & Mary
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,10 @@
  *
  ******************************************************************************/
 
+#include "common.h"
 #include "template.h"
+#ifndef CHECK_TEMPLATE
 #include "blaslapack.h"
+#include "magma_wrapper.h"
 #include "auxiliary.h"
+#endif

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, College of William & Mary
+ * Copyright (c) 2018, College of William & Mary
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,12 +33,22 @@
  *
  ******************************************************************************/
 
+#ifndef THIS_FILE
+#define THIS_FILE "../eigs/update_projection.c"
+#endif
+
+
 #include <stdlib.h>
 #include <assert.h>
-#include "const.h"
 #include "numerical.h"
+#include "common_eigs.h"
+/* Keep automatically generated headers under this section  */
+#ifndef CHECK_TEMPLATE
+#include "auxiliary_eigs.h"
 #include "update_projection.h"
-#include "globalsum.h"
+#endif
+
+#ifdef SUPPORTED_TYPE
 
 /*******************************************************************************
  * Subroutine update_projection - Z = X'*Y. If Z is a Hermitian matrix 
@@ -52,7 +62,7 @@
  * ldX         The leading dimension of X
  * Y           Matrix with size nLocal x numCols+blockSize
  * ldY         The leading dimension of Y
- * Z           Matrix with size nLocal x numCols+blockSize
+ * Z           Matrix with size numCols+blockSize x numCols+blockSize
  * numCols     The number of columns that haven't changed
  * blockSize   The number of columns that have changed
  * rwork       Workspace
@@ -69,22 +79,10 @@
 
 TEMPLATE_PLEASE
 int update_projection_Sprimme(SCALAR *X, PRIMME_INT ldX, SCALAR *Y,
-      PRIMME_INT ldY, SCALAR *Z, PRIMME_INT ldZ, PRIMME_INT nLocal, int numCols,
-      int blockSize, SCALAR *rwork, size_t *lrwork, int isSymmetric,
-      primme_params *primme) {
+      PRIMME_INT ldY, HSCALAR *Z, PRIMME_INT ldZ, PRIMME_INT nLocal,
+      int numCols, int blockSize, int isSymmetric, primme_context ctx) {
 
-   int count, m;
-
-   /* -------------------------- */
-   /* Return memory requirements */
-   /* -------------------------- */
-
-   if (X == NULL) {
-      *lrwork = max(*lrwork,
-            (size_t)(numCols+blockSize)*numCols*2 
-            + (isSymmetric ? 0 : (size_t)blockSize*numCols*2));
-      return 0;
-   }
+   primme_params *primme = ctx.primme;
 
    assert(ldX >= nLocal && ldY >= nLocal && ldZ >= numCols+blockSize);
 
@@ -98,9 +96,10 @@ int update_projection_Sprimme(SCALAR *X, PRIMME_INT ldX, SCALAR *Y,
    /* Grow Z by blockSize number of rows and columns all at once            */
    /* --------------------------------------------------------------------- */
 
-   m = numCols+blockSize;
-   Num_gemm_Sprimme("C", "N", m, blockSize, nLocal, 1.0, 
-      X, ldX, &Y[ldY*numCols], ldY, 0.0, &Z[ldZ*numCols], ldZ);
+   int m = numCols+blockSize;
+   Num_zero_matrix_SHprimme(&Z[ldZ * numCols], m, blockSize, ldZ, ctx);
+   CHKERR(Num_gemm_ddh_Sprimme("C", "N", m, blockSize, nLocal, 1.0, X, ldX,
+         &Y[ldY * numCols], ldY, 0.0, &Z[ldZ * numCols], ldZ, ctx));
 
    /* -------------------------------------------------------------- */
    /* Alternative to the previous call:                              */
@@ -117,8 +116,9 @@ int update_projection_Sprimme(SCALAR *X, PRIMME_INT ldX, SCALAR *Y,
    */
 
    if (!isSymmetric) {
-      Num_gemm_Sprimme("C", "N", blockSize, numCols, nLocal, 1.0, 
-            &X[ldX*numCols], ldX, Y, ldY, 0.0, &Z[numCols], ldZ);
+      Num_zero_matrix_SHprimme(&Z[numCols], blockSize, numCols, ldZ, ctx);
+      CHKERR(Num_gemm_ddh_Sprimme("C", "N", blockSize, numCols, nLocal, 1.0,
+            &X[ldX * numCols], ldX, Y, ldY, 0.0, &Z[numCols], ldZ, ctx));
    }
 
    if (primme->numProcs > 1 && isSymmetric) {
@@ -126,34 +126,42 @@ int update_projection_Sprimme(SCALAR *X, PRIMME_INT ldX, SCALAR *Y,
       /* Reduce the upper triangular part of the new columns in Z.             */
       /* --------------------------------------------------------------------- */
 
-      Num_copy_trimatrix_compact_Sprimme(&Z[ldZ*numCols], m, blockSize, ldZ,
+      HSCALAR *rwork;
+      CHKERR(Num_malloc_SHprimme((numCols+blockSize)*blockSize, &rwork, ctx));
+      int count;
+      Num_copy_trimatrix_compact_SHprimme(&Z[ldZ*numCols], m, blockSize, ldZ,
             numCols, rwork, &count);
-      assert((size_t)count*2 <= *lrwork);
+      assert(count <= (numCols+blockSize)*blockSize);
 
-      CHKERR(globalSum_Sprimme(rwork, &rwork[count], count, primme), -1);
+      CHKERR(globalSum_SHprimme(rwork, count, ctx));
 
-      Num_copy_compact_trimatrix_Sprimme(&rwork[count], m, blockSize, numCols,
+      Num_copy_compact_trimatrix_SHprimme(rwork, m, blockSize, numCols,
             &Z[ldZ*numCols], ldZ);
+      CHKERR(Num_free_SHprimme(rwork, ctx));
    }
    else if (primme->numProcs > 1 && !isSymmetric) {
       /* --------------------------------------------------------------------- */
       /* Reduce Z(:,numCols:end) and Z(numCols:end,:).                         */
       /* --------------------------------------------------------------------- */
 
-      Num_copy_matrix_Sprimme(&Z[ldZ*numCols], m, blockSize, ldZ,
-            rwork, m);
-      Num_copy_matrix_Sprimme(&Z[numCols], blockSize, numCols, ldZ,
-            &rwork[m*blockSize], blockSize);
-      count = m*blockSize+blockSize*numCols;
-      assert((size_t)count*2 <= *lrwork);
+      HSCALAR *rwork;
+      int count = m * blockSize + blockSize * numCols;
+      CHKERR(Num_malloc_SHprimme(count, &rwork, ctx));
+      Num_copy_matrix_SHprimme(&Z[ldZ*numCols], m, blockSize, ldZ,
+            rwork, m, ctx);
+      Num_copy_matrix_SHprimme(&Z[numCols], blockSize, numCols, ldZ,
+            &rwork[m*blockSize], blockSize, ctx);
 
-      CHKERR(globalSum_Sprimme(rwork, &rwork[count], count, primme), -1);
+      CHKERR(globalSum_SHprimme(rwork, count, ctx));
 
-      Num_copy_matrix_Sprimme(&rwork[count], m, blockSize, m, &Z[ldZ*numCols],
-            ldZ);
-      Num_copy_matrix_Sprimme(&rwork[count+m*blockSize], blockSize, numCols,
-            blockSize, &Z[numCols], ldZ);
+      Num_copy_matrix_SHprimme(rwork, m, blockSize, m, &Z[ldZ*numCols],
+            ldZ, ctx);
+      Num_copy_matrix_SHprimme(&rwork[m*blockSize], blockSize, numCols,
+            blockSize, &Z[numCols], ldZ, ctx);
+      CHKERR(Num_free_SHprimme(rwork, ctx));
    }
 
    return 0;
 }
+
+#endif /* SUPPORTED_TYPE */

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, College of William & Mary
+ * Copyright (c) 2018, College of William & Mary
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,21 @@
 #ifndef PRIMME_H
 #define PRIMME_H
 
+/* Define version */
+
+#define PRIMME_VERSION_MAJOR      3
+#define PRIMME_VERSION_MINOR      0
+
+#if defined(__clang__) && defined(__FLT16_EPSILON__)
+#  define PRIMME_HALF __fp16
+#  define PRIMME_WITH_NATIVE_HALF
+#else
+   struct _primme_half {int short a;};
+#  define PRIMME_HALF struct _primme_half
+#endif
+
+#define PRIMME_QUAD double long
+
 /* A C99 code with complex type is not a valid C++ code. However C++          */
 /* compilers usually can take it. Nevertheless in order to avoid the warnings */
 /* while compiling in pedantic mode, we use the proper complex type for C99   */
@@ -44,12 +59,19 @@
 
 #ifdef __cplusplus
 #  include <complex>
+   struct _primme_complex_half {PRIMME_HALF r; PRIMME_HALF i;};
+#  define PRIMME_COMPLEX_HALF struct _primme_complex_half
 #  define PRIMME_COMPLEX_FLOAT std::complex<float>
 #  define PRIMME_COMPLEX_DOUBLE std::complex<double>
+#  define PRIMME_COMPLEX_QUAD std::complex<PRIMME_QUAD>
 #else
 #  include <complex.h>
+/* Complex half is not part of C99 */
+   struct _primme_complex_half {PRIMME_HALF r; PRIMME_HALF i;};
+#  define PRIMME_COMPLEX_HALF struct _primme_complex_half
 #  define PRIMME_COMPLEX_FLOAT float complex
 #  define PRIMME_COMPLEX_DOUBLE double complex
+#  define PRIMME_COMPLEX_QUAD long double complex
 #endif
 
 /* Required by some C++ compilers when including inttypes.h */
@@ -89,4 +111,14 @@
 #include "primme_eigs.h"
 #include "primme_svds.h"
 
+/* Error messages */
+
+#define PRIMME_UNEXPECTED_FAILURE         -1
+#define PRIMME_MALLOC_FAILURE             -2
+#define PRIMME_MAIN_ITER_FAILURE          -3
+#define PRIMME_LAPACK_FAILURE             -40
+#define PRIMME_USER_FAILURE               -41
+#define PRIMME_ORTHO_CONST_FAILURE        -42
+#define PRIMME_PARALLEL_FAILURE           -43
+#define PRIMME_FUNCTION_UNAVAILABLE       -44
 #endif /* PRIMME_H */

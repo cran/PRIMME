@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, College of William & Mary
+ * Copyright (c) 2018, College of William & Mary
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,44 +33,166 @@
 
 #ifndef update_W_H
 #define update_W_H
-#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_Sprimme)
-#  define matrixMatvec_Sprimme CONCAT(matrixMatvec_,SCALAR_SUF)
-#endif
-#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_Rprimme)
-#  define matrixMatvec_Rprimme CONCAT(matrixMatvec_,REAL_SUF)
-#endif
-int matrixMatvec_dprimme(double *V, PRIMME_INT nLocal, PRIMME_INT ldV,
-      double *W, PRIMME_INT ldW, int basisSize, int blockSize,
-      primme_params *primme);
 #if !defined(CHECK_TEMPLATE) && !defined(update_Q_Sprimme)
-#  define update_Q_Sprimme CONCAT(update_Q_,SCALAR_SUF)
+#  define update_Q_Sprimme CONCAT(update_Q_,WITH_KIND(SCALAR_SUF))
 #endif
 #if !defined(CHECK_TEMPLATE) && !defined(update_Q_Rprimme)
-#  define update_Q_Rprimme CONCAT(update_Q_,REAL_SUF)
+#  define update_Q_Rprimme CONCAT(update_Q_,WITH_KIND(REAL_SUF))
 #endif
-int update_Q_dprimme(double *V, PRIMME_INT nLocal, PRIMME_INT ldV,
-      double *W, PRIMME_INT ldW, double *Q, PRIMME_INT ldQ, double *R, int ldR,
-      double targetShift, int basisSize, int blockSize, double *rwork,
-      size_t *rworkSize, double machEps, primme_params *primme);
-int matrixMatvec_zprimme(PRIMME_COMPLEX_DOUBLE *V, PRIMME_INT nLocal, PRIMME_INT ldV,
-      PRIMME_COMPLEX_DOUBLE *W, PRIMME_INT ldW, int basisSize, int blockSize,
-      primme_params *primme);
-int update_Q_zprimme(PRIMME_COMPLEX_DOUBLE *V, PRIMME_INT nLocal, PRIMME_INT ldV,
-      PRIMME_COMPLEX_DOUBLE *W, PRIMME_INT ldW, PRIMME_COMPLEX_DOUBLE *Q, PRIMME_INT ldQ, PRIMME_COMPLEX_DOUBLE *R, int ldR,
-      double targetShift, int basisSize, int blockSize, PRIMME_COMPLEX_DOUBLE *rwork,
-      size_t *rworkSize, double machEps, primme_params *primme);
-int matrixMatvec_sprimme(float *V, PRIMME_INT nLocal, PRIMME_INT ldV,
-      float *W, PRIMME_INT ldW, int basisSize, int blockSize,
-      primme_params *primme);
-int update_Q_sprimme(float *V, PRIMME_INT nLocal, PRIMME_INT ldV,
-      float *W, PRIMME_INT ldW, float *Q, PRIMME_INT ldQ, float *R, int ldR,
-      double targetShift, int basisSize, int blockSize, float *rwork,
-      size_t *rworkSize, double machEps, primme_params *primme);
-int matrixMatvec_cprimme(PRIMME_COMPLEX_FLOAT *V, PRIMME_INT nLocal, PRIMME_INT ldV,
-      PRIMME_COMPLEX_FLOAT *W, PRIMME_INT ldW, int basisSize, int blockSize,
-      primme_params *primme);
-int update_Q_cprimme(PRIMME_COMPLEX_FLOAT *V, PRIMME_INT nLocal, PRIMME_INT ldV,
-      PRIMME_COMPLEX_FLOAT *W, PRIMME_INT ldW, PRIMME_COMPLEX_FLOAT *Q, PRIMME_INT ldQ, PRIMME_COMPLEX_FLOAT *R, int ldR,
-      double targetShift, int basisSize, int blockSize, PRIMME_COMPLEX_FLOAT *rwork,
-      size_t *rworkSize, double machEps, primme_params *primme);
+#if !defined(CHECK_TEMPLATE) && !defined(update_Q_SHprimme)
+#  define update_Q_SHprimme CONCAT(update_Q_,WITH_KIND(HOST_SCALAR_SUF))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(update_Q_RHprimme)
+#  define update_Q_RHprimme CONCAT(update_Q_,WITH_KIND(HOST_REAL_SUF))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(update_Q_SXprimme)
+#  define update_Q_SXprimme CONCAT(update_Q_,WITH_KIND(XSCALAR_SUF))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(update_Q_RXprimme)
+#  define update_Q_RXprimme CONCAT(update_Q_,WITH_KIND(XREAL_SUF))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(update_Q_Shprimme)
+#  define update_Q_Shprimme CONCAT(update_Q_,CONCAT(CONCAT(CONCAT(STEM_C,USE_ARITH(h,k)),primme),KIND_C))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(update_Q_Rhprimme)
+#  define update_Q_Rhprimme CONCAT(update_Q_,CONCAT(CONCAT(CONCAT(STEM_C,h),primme),KIND_C))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(update_Q_Ssprimme)
+#  define update_Q_Ssprimme CONCAT(update_Q_,CONCAT(CONCAT(CONCAT(STEM_C,USE_ARITH(s,c)),primme),KIND_C))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(update_Q_Rsprimme)
+#  define update_Q_Rsprimme CONCAT(update_Q_,CONCAT(CONCAT(CONCAT(STEM_C,s),primme),KIND_C))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(update_Q_Sdprimme)
+#  define update_Q_Sdprimme CONCAT(update_Q_,CONCAT(CONCAT(CONCAT(STEM_C,USE_ARITH(d,z)),primme),KIND_C))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(update_Q_Rdprimme)
+#  define update_Q_Rdprimme CONCAT(update_Q_,CONCAT(CONCAT(CONCAT(STEM_C,d),primme),KIND_C))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(update_Q_Sqprimme)
+#  define update_Q_Sqprimme CONCAT(update_Q_,CONCAT(CONCAT(CONCAT(STEM_C,USE_ARITH(q,w)),primme),KIND_C))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(update_Q_Rqprimme)
+#  define update_Q_Rqprimme CONCAT(update_Q_,CONCAT(CONCAT(CONCAT(STEM_C,q),primme),KIND_C))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(update_Q_SXhprimme)
+#  define update_Q_SXhprimme CONCAT(update_Q_,CONCAT(CONCAT(CONCAT(,USE_ARITH(h,k)),primme),KIND_C))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(update_Q_RXhprimme)
+#  define update_Q_RXhprimme CONCAT(update_Q_,CONCAT(CONCAT(CONCAT(,h),primme),KIND_C))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(update_Q_SXsprimme)
+#  define update_Q_SXsprimme CONCAT(update_Q_,CONCAT(CONCAT(CONCAT(,USE_ARITH(s,c)),primme),KIND_C))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(update_Q_RXsprimme)
+#  define update_Q_RXsprimme CONCAT(update_Q_,CONCAT(CONCAT(CONCAT(,s),primme),KIND_C))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(update_Q_SXdprimme)
+#  define update_Q_SXdprimme CONCAT(update_Q_,CONCAT(CONCAT(CONCAT(,USE_ARITH(d,z)),primme),KIND_C))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(update_Q_RXdprimme)
+#  define update_Q_RXdprimme CONCAT(update_Q_,CONCAT(CONCAT(CONCAT(,d),primme),KIND_C))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(update_Q_SXqprimme)
+#  define update_Q_SXqprimme CONCAT(update_Q_,CONCAT(CONCAT(CONCAT(,USE_ARITH(q,w)),primme),KIND_C))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(update_Q_RXqprimme)
+#  define update_Q_RXqprimme CONCAT(update_Q_,CONCAT(CONCAT(CONCAT(,q),primme),KIND_C))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(update_Q_SHhprimme)
+#  define update_Q_SHhprimme CONCAT(update_Q_,CONCAT(CONCAT(CONCAT(,USE_ARITH(s,c)),primme),KIND_C))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(update_Q_RHhprimme)
+#  define update_Q_RHhprimme CONCAT(update_Q_,CONCAT(CONCAT(CONCAT(,s),primme),KIND_C))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(update_Q_SHsprimme)
+#  define update_Q_SHsprimme CONCAT(update_Q_,CONCAT(CONCAT(CONCAT(,USE_ARITH(s,c)),primme),KIND_C))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(update_Q_RHsprimme)
+#  define update_Q_RHsprimme CONCAT(update_Q_,CONCAT(CONCAT(CONCAT(,s),primme),KIND_C))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(update_Q_SHdprimme)
+#  define update_Q_SHdprimme CONCAT(update_Q_,CONCAT(CONCAT(CONCAT(,USE_ARITH(d,z)),primme),KIND_C))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(update_Q_RHdprimme)
+#  define update_Q_RHdprimme CONCAT(update_Q_,CONCAT(CONCAT(CONCAT(,d),primme),KIND_C))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(update_Q_SHqprimme)
+#  define update_Q_SHqprimme CONCAT(update_Q_,CONCAT(CONCAT(CONCAT(,USE_ARITH(q,w)),primme),KIND_C))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(update_Q_RHqprimme)
+#  define update_Q_RHqprimme CONCAT(update_Q_,CONCAT(CONCAT(CONCAT(,q),primme),KIND_C))
+#endif
+int update_Q_dprimme(dummy_type_dprimme *BV, PRIMME_INT nLocal, PRIMME_INT ldBV, dummy_type_dprimme *W,
+      PRIMME_INT ldW, dummy_type_dprimme *Q, PRIMME_INT ldQ, dummy_type_dprimme *R, int ldR,
+      dummy_type_dprimme *QtQ, int ldQtQ, dummy_type_dprimme *fQtQ, int ldfQtQ, double targetShift,
+      int basisSize, int blockSize, int *nQ, primme_context ctx);
+int update_Q_hprimme(dummy_type_hprimme *BV, PRIMME_INT nLocal, PRIMME_INT ldBV, dummy_type_hprimme *W,
+      PRIMME_INT ldW, dummy_type_hprimme *Q, PRIMME_INT ldQ, dummy_type_sprimme *R, int ldR,
+      dummy_type_sprimme *QtQ, int ldQtQ, dummy_type_sprimme *fQtQ, int ldfQtQ, double targetShift,
+      int basisSize, int blockSize, int *nQ, primme_context ctx);
+int update_Q_kprimme_normal(dummy_type_kprimme *BV, PRIMME_INT nLocal, PRIMME_INT ldBV, dummy_type_kprimme *W,
+      PRIMME_INT ldW, dummy_type_kprimme *Q, PRIMME_INT ldQ, dummy_type_cprimme *R, int ldR,
+      dummy_type_cprimme *QtQ, int ldQtQ, dummy_type_cprimme *fQtQ, int ldfQtQ, double targetShift,
+      int basisSize, int blockSize, int *nQ, primme_context ctx);
+int update_Q_kprimme(dummy_type_kprimme *BV, PRIMME_INT nLocal, PRIMME_INT ldBV, dummy_type_kprimme *W,
+      PRIMME_INT ldW, dummy_type_kprimme *Q, PRIMME_INT ldQ, dummy_type_cprimme *R, int ldR,
+      dummy_type_cprimme *QtQ, int ldQtQ, dummy_type_cprimme *fQtQ, int ldfQtQ, double targetShift,
+      int basisSize, int blockSize, int *nQ, primme_context ctx);
+int update_Q_sprimme(dummy_type_sprimme *BV, PRIMME_INT nLocal, PRIMME_INT ldBV, dummy_type_sprimme *W,
+      PRIMME_INT ldW, dummy_type_sprimme *Q, PRIMME_INT ldQ, dummy_type_sprimme *R, int ldR,
+      dummy_type_sprimme *QtQ, int ldQtQ, dummy_type_sprimme *fQtQ, int ldfQtQ, double targetShift,
+      int basisSize, int blockSize, int *nQ, primme_context ctx);
+int update_Q_cprimme_normal(dummy_type_cprimme *BV, PRIMME_INT nLocal, PRIMME_INT ldBV, dummy_type_cprimme *W,
+      PRIMME_INT ldW, dummy_type_cprimme *Q, PRIMME_INT ldQ, dummy_type_cprimme *R, int ldR,
+      dummy_type_cprimme *QtQ, int ldQtQ, dummy_type_cprimme *fQtQ, int ldfQtQ, double targetShift,
+      int basisSize, int blockSize, int *nQ, primme_context ctx);
+int update_Q_cprimme(dummy_type_cprimme *BV, PRIMME_INT nLocal, PRIMME_INT ldBV, dummy_type_cprimme *W,
+      PRIMME_INT ldW, dummy_type_cprimme *Q, PRIMME_INT ldQ, dummy_type_cprimme *R, int ldR,
+      dummy_type_cprimme *QtQ, int ldQtQ, dummy_type_cprimme *fQtQ, int ldfQtQ, double targetShift,
+      int basisSize, int blockSize, int *nQ, primme_context ctx);
+int update_Q_zprimme_normal(dummy_type_zprimme *BV, PRIMME_INT nLocal, PRIMME_INT ldBV, dummy_type_zprimme *W,
+      PRIMME_INT ldW, dummy_type_zprimme *Q, PRIMME_INT ldQ, dummy_type_zprimme *R, int ldR,
+      dummy_type_zprimme *QtQ, int ldQtQ, dummy_type_zprimme *fQtQ, int ldfQtQ, double targetShift,
+      int basisSize, int blockSize, int *nQ, primme_context ctx);
+int update_Q_zprimme(dummy_type_zprimme *BV, PRIMME_INT nLocal, PRIMME_INT ldBV, dummy_type_zprimme *W,
+      PRIMME_INT ldW, dummy_type_zprimme *Q, PRIMME_INT ldQ, dummy_type_zprimme *R, int ldR,
+      dummy_type_zprimme *QtQ, int ldQtQ, dummy_type_zprimme *fQtQ, int ldfQtQ, double targetShift,
+      int basisSize, int blockSize, int *nQ, primme_context ctx);
+int update_Q_magma_hprimme(dummy_type_magma_hprimme *BV, PRIMME_INT nLocal, PRIMME_INT ldBV, dummy_type_magma_hprimme *W,
+      PRIMME_INT ldW, dummy_type_magma_hprimme *Q, PRIMME_INT ldQ, dummy_type_sprimme *R, int ldR,
+      dummy_type_sprimme *QtQ, int ldQtQ, dummy_type_sprimme *fQtQ, int ldfQtQ, double targetShift,
+      int basisSize, int blockSize, int *nQ, primme_context ctx);
+int update_Q_magma_kprimme_normal(dummy_type_magma_kprimme *BV, PRIMME_INT nLocal, PRIMME_INT ldBV, dummy_type_magma_kprimme *W,
+      PRIMME_INT ldW, dummy_type_magma_kprimme *Q, PRIMME_INT ldQ, dummy_type_cprimme *R, int ldR,
+      dummy_type_cprimme *QtQ, int ldQtQ, dummy_type_cprimme *fQtQ, int ldfQtQ, double targetShift,
+      int basisSize, int blockSize, int *nQ, primme_context ctx);
+int update_Q_magma_kprimme(dummy_type_magma_kprimme *BV, PRIMME_INT nLocal, PRIMME_INT ldBV, dummy_type_magma_kprimme *W,
+      PRIMME_INT ldW, dummy_type_magma_kprimme *Q, PRIMME_INT ldQ, dummy_type_cprimme *R, int ldR,
+      dummy_type_cprimme *QtQ, int ldQtQ, dummy_type_cprimme *fQtQ, int ldfQtQ, double targetShift,
+      int basisSize, int blockSize, int *nQ, primme_context ctx);
+int update_Q_magma_sprimme(dummy_type_magma_sprimme *BV, PRIMME_INT nLocal, PRIMME_INT ldBV, dummy_type_magma_sprimme *W,
+      PRIMME_INT ldW, dummy_type_magma_sprimme *Q, PRIMME_INT ldQ, dummy_type_sprimme *R, int ldR,
+      dummy_type_sprimme *QtQ, int ldQtQ, dummy_type_sprimme *fQtQ, int ldfQtQ, double targetShift,
+      int basisSize, int blockSize, int *nQ, primme_context ctx);
+int update_Q_magma_cprimme_normal(dummy_type_magma_cprimme *BV, PRIMME_INT nLocal, PRIMME_INT ldBV, dummy_type_magma_cprimme *W,
+      PRIMME_INT ldW, dummy_type_magma_cprimme *Q, PRIMME_INT ldQ, dummy_type_cprimme *R, int ldR,
+      dummy_type_cprimme *QtQ, int ldQtQ, dummy_type_cprimme *fQtQ, int ldfQtQ, double targetShift,
+      int basisSize, int blockSize, int *nQ, primme_context ctx);
+int update_Q_magma_cprimme(dummy_type_magma_cprimme *BV, PRIMME_INT nLocal, PRIMME_INT ldBV, dummy_type_magma_cprimme *W,
+      PRIMME_INT ldW, dummy_type_magma_cprimme *Q, PRIMME_INT ldQ, dummy_type_cprimme *R, int ldR,
+      dummy_type_cprimme *QtQ, int ldQtQ, dummy_type_cprimme *fQtQ, int ldfQtQ, double targetShift,
+      int basisSize, int blockSize, int *nQ, primme_context ctx);
+int update_Q_magma_dprimme(dummy_type_magma_dprimme *BV, PRIMME_INT nLocal, PRIMME_INT ldBV, dummy_type_magma_dprimme *W,
+      PRIMME_INT ldW, dummy_type_magma_dprimme *Q, PRIMME_INT ldQ, dummy_type_dprimme *R, int ldR,
+      dummy_type_dprimme *QtQ, int ldQtQ, dummy_type_dprimme *fQtQ, int ldfQtQ, double targetShift,
+      int basisSize, int blockSize, int *nQ, primme_context ctx);
+int update_Q_magma_zprimme_normal(dummy_type_magma_zprimme *BV, PRIMME_INT nLocal, PRIMME_INT ldBV, dummy_type_magma_zprimme *W,
+      PRIMME_INT ldW, dummy_type_magma_zprimme *Q, PRIMME_INT ldQ, dummy_type_zprimme *R, int ldR,
+      dummy_type_zprimme *QtQ, int ldQtQ, dummy_type_zprimme *fQtQ, int ldfQtQ, double targetShift,
+      int basisSize, int blockSize, int *nQ, primme_context ctx);
+int update_Q_magma_zprimme(dummy_type_magma_zprimme *BV, PRIMME_INT nLocal, PRIMME_INT ldBV, dummy_type_magma_zprimme *W,
+      PRIMME_INT ldW, dummy_type_magma_zprimme *Q, PRIMME_INT ldQ, dummy_type_zprimme *R, int ldR,
+      dummy_type_zprimme *QtQ, int ldQtQ, dummy_type_zprimme *fQtQ, int ldfQtQ, double targetShift,
+      int basisSize, int blockSize, int *nQ, primme_context ctx);
 #endif
