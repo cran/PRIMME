@@ -175,6 +175,9 @@ TEMPLATE_PLEASE
 int main_iter_Sprimme(HEVAL *evals, SCALAR *evecs, PRIMME_INT ldevecs,
       HREAL *resNorms, double startTime, int *ret, primme_context ctx) {
 
+   /* Default error is something is wrong in this function */
+   *ret = PRIMME_MAIN_ITER_FAILURE;
+
    primme_params *primme = ctx.primme;
                             /* primme parameters */
    int i;                   /* Loop variable                                 */
@@ -423,7 +426,9 @@ int main_iter_Sprimme(HEVAL *evals, SCALAR *evecs, PRIMME_INT ldevecs,
    if (primme->dynamicMethodSwitch > 0) {
       initializeModel(&CostModel, primme);
       CostModel.MV = primme->stats.timeMatvec/primme->stats.numMatvecs;
-      if (primme->numEvals < 5)
+      if (primme->numEvals < 5 ||
+            primme->maxBasisSize + (primme->locking ? primme->numEvals : 0) >=
+                  primme->n)
          primme->dynamicMethodSwitch = 1;   /* Start tentatively GD+k */
       else
          primme->dynamicMethodSwitch = 3;   /* Start GD+k for 1st pair */
@@ -602,9 +607,8 @@ int main_iter_Sprimme(HEVAL *evals, SCALAR *evecs, PRIMME_INT ldevecs,
                {
                   CostModel.MV =
                      primme->stats.timeMatvec/primme->stats.numMatvecs;
-                  int ret0 = update_statistics(&CostModel, primme, tstart, 
-                        recentlyConverged, 0, numConverged, blockNorms[0], 
-                        primme->stats.estimateLargestSVal); 
+                  int ret0 = update_statistics(&CostModel, primme, tstart,
+                        recentlyConverged, 0, numConverged, blockNorms[0]);
 
                   if (ret0) switch (primme->dynamicMethodSwitch) {
                      /* for few evals (dyn=1) evaluate GD+k only at restart*/
@@ -709,7 +713,7 @@ int main_iter_Sprimme(HEVAL *evals, SCALAR *evecs, PRIMME_INT ldevecs,
             /* we are in case a), and otherwise we are in case b).            */
 
             if (i >= maxNumRandoms) {
-               if (availableBlockSize > 0 && blockSize0 <= 0) {
+               if (availableBlockSize > 0 && blockSize0 <= 0 && reset == 0) {
                   wholeSpace = 1;
                } else {
                   reset = 2;
@@ -737,43 +741,45 @@ int main_iter_Sprimme(HEVAL *evals, SCALAR *evecs, PRIMME_INT ldevecs,
             if (primme->locking && !primme->massMatrixMatvec &&
                   !primme->correctionParams.precondition &&
                   primme->correctionParams.maxInnerIterations == 0) {
-               for (i = 0; i < blockSize0 && numConverged < primme->numEvals;
-                     i++) {
-                  HREAL normXx = 0.0;
-                  if (primme->orth == primme_orth_explicit_I) {
-                     HSCALAR *Xx = NULL;
-                     CHKERR(Num_malloc_SHprimme(numLocked, &Xx, ctx));
-                     CHKERR(Num_zero_matrix_SHprimme(
-                           Xx, numLocked, 1, numLocked, ctx));
-                     CHKERR(Num_gemv_SHprimme("N", numLocked, basisSize, 1.0,
-                           &VtBV[ldVtBV * numLocked], ldVtBV,
-                           &hVecs[iev[i] * basisSize], 1, 0.0, Xx, 1, ctx));
-                     normXx =
-                           ABS(Num_dot_SHprimme(numLocked, Xx, 1, Xx, 1, ctx));
-                     CHKERR(Num_free_SHprimme(Xx, ctx));
-                  }
-                  HREAL normRlockedi =
-                        ABS(Num_dot_SHprimme(ldRlocked, &Rlocked[ldRlocked * i],
-                              1, &Rlocked[ldRlocked * i], 1, ctx));
-                  HREAL newBlockNorm =
-                        sqrt(max(blockNorms[i] * blockNorms[i] -
-                                       normRlockedi * (1. + normXx),
-                              0.0));
-                  CHKERR(check_convergence_Sprimme(&V[(basisSize + i) * ldV],
-                        ldV, 1 /* given X */, NULL, 0, 0 /* not given R */,
-                        evecs, numLocked, ldevecs, Bevecs, ldBevecs, VtBV,
-                        ldVtBV, 0, 1, &flags[iev[i]], &newBlockNorm,
-                        &hVals[iev[i]], &reset,
-                        -1 /* don't check practically convergence */, ctx));
-                  basisNorms[iev[i]] = newBlockNorm;
-                  if (flags[iev[i]] == CONVERGED) {
-                     flags[iev[i]] = PRACTICALLY_CONVERGED;
-                     numConverged++;
-                     /* Report a pair was soft converged */
-                     CHKERR(monitorFun_Sprimme(hVals, basisSize, flags, &iev[i],
-                           1, basisNorms, numConverged, NULL, 0, NULL, NULL,
-                           -1, -1.0, NULL, 0.0, primme_event_converged,
-                           startTime, ctx));
+               if (numLocked > 0) {
+                  for (i = 0; i < blockSize0 && numConverged < primme->numEvals;
+                        i++) {
+                     HREAL normXx = 0.0;
+                     if (primme->orth == primme_orth_explicit_I) {
+                        HSCALAR *Xx = NULL;
+                        CHKERR(Num_malloc_SHprimme(numLocked, &Xx, ctx));
+                        CHKERR(Num_zero_matrix_SHprimme(
+                              Xx, numLocked, 1, numLocked, ctx));
+                        CHKERR(Num_gemv_SHprimme("N", numLocked, basisSize, 1.0,
+                              &VtBV[ldVtBV * numLocked], ldVtBV,
+                              &hVecs[iev[i] * basisSize], 1, 0.0, Xx, 1, ctx));
+                        normXx = ABS(
+                              Num_dot_SHprimme(numLocked, Xx, 1, Xx, 1, ctx));
+                        CHKERR(Num_free_SHprimme(Xx, ctx));
+                     }
+                     HREAL normRlockedi = ABS(
+                           Num_dot_SHprimme(ldRlocked, &Rlocked[ldRlocked * i],
+                                 1, &Rlocked[ldRlocked * i], 1, ctx));
+                     HREAL newBlockNorm =
+                           sqrt(max(blockNorms[i] * blockNorms[i] -
+                                          normRlockedi * (1. + normXx),
+                                 0.0));
+                     CHKERR(check_convergence_Sprimme(&V[(basisSize + i) * ldV],
+                           ldV, 1 /* given X */, NULL, 0, 0 /* not given R */,
+                           evecs, numLocked, ldevecs, Bevecs, ldBevecs, VtBV,
+                           ldVtBV, 0, 1, &flags[iev[i]], &newBlockNorm,
+                           &hVals[iev[i]], &reset,
+                           -1 /* don't check practically convergence */, ctx));
+                     basisNorms[iev[i]] = newBlockNorm;
+                     if (flags[iev[i]] == CONVERGED) {
+                        flags[iev[i]] = PRACTICALLY_CONVERGED;
+                        numConverged++;
+                        /* Report a pair was soft converged */
+                        CHKERR(monitorFun_Sprimme(hVals, basisSize, flags,
+                              &iev[i], 1, basisNorms, numConverged, NULL, 0,
+                              NULL, NULL, -1, -1.0, NULL, 0.0,
+                              primme_event_converged, startTime, ctx));
+                     }
                   }
                }
                CHKERR(Num_free_SHprimme(Rlocked, ctx));
@@ -858,6 +864,8 @@ int main_iter_Sprimme(HEVAL *evals, SCALAR *evecs, PRIMME_INT ldevecs,
             /* than s_0 after resetting. The condition restartsSinceReset > 0 */
             /* avoids infinite loop in those cases.                           */
 
+            double eps_orth;
+            CHKERR(machineEpsOrth_Sprimme(&eps_orth, ctx));
             if (primme->projectionParams.projection == primme_proj_refined &&
                   basisSize > 0 && restartsSinceReset > 1 &&
                   targetShiftIndex >= 0 &&
@@ -865,7 +873,7 @@ int main_iter_Sprimme(HEVAL *evals, SCALAR *evecs, PRIMME_INT ldevecs,
                         hVals[0]) -
                               max(primme->aNorm,
                                     primme->stats.estimateLargestSVal) *
-                                    MACHINE_EPSILON >
+                                    eps_orth >
                         hSVals[0]) {
 
                reset = 2;
@@ -1173,7 +1181,7 @@ int main_iter_Sprimme(HEVAL *evals, SCALAR *evecs, PRIMME_INT ldevecs,
             tstart = primme_wTimer();
             CostModel.MV = primme->stats.timeMatvec/primme->stats.numMatvecs;
             update_statistics(&CostModel, primme, tstart, 0, 1,
-               numConverged, blockNorms[0], primme->stats.estimateMaxEVal); 
+               numConverged, blockNorms[0]); 
             CHKERR(switch_from_GDpk(&CostModel, ctx));
          } /* ---------------------------------------------------------- */
 
@@ -1507,11 +1515,12 @@ STATIC int prepare_candidates(SCALAR *V, PRIMME_INT ldV, SCALAR *W,
       /* Recompute flags in iev(*blockSize:*blockSize+blockNormsize) */
       for (i=*blockSize; i<blockNormsSize; i++)
          flagsBlock[i-*blockSize] = flags[iev[i]];
-      CHKERR(check_convergence_Sprimme(&X[(*blockSize) * ldV], ldV, computeXR,
-            &R[(*blockSize) * ldW], ldW, computeXR, evecs, numLocked, ldevecs,
-            Bevecs, ldBevecs, VtBV, ldVtBV, 0, blockNormsSize, flagsBlock,
-            &blockNorms[*blockSize], hValsBlock, reset, practConvChecking,
-            ctx));
+      CHKERR(check_convergence_Sprimme(X ? &X[(*blockSize) * ldV] : NULL, ldV,
+            computeXR, R ? &R[(*blockSize) * ldW] : NULL, ldW, computeXR, evecs,
+            numLocked, ldevecs, Bevecs, ldBevecs, VtBV, ldVtBV, 0,
+            blockNormsSize, flagsBlock,
+            blockNorms ? &blockNorms[*blockSize] : NULL, hValsBlock, reset,
+            practConvChecking, ctx));
 
       /* Compact blockNorms, X and R for the unconverged pairs in    */
       /* iev(*blockSize:*blockSize+blockNormsize). Do the proper     */
@@ -1638,18 +1647,18 @@ STATIC int prepare_candidates(SCALAR *V, PRIMME_INT ldV, SCALAR *W,
       assert(ldV == ldW); /* This functions only works in this way */
       CHKERR(Num_update_VWXR_Sprimme(V, W, BV, nLocal, basisSize, ldV,
                hVecsBlock, basisSize, ldhVecs, hValsBlock,
-               &X[(*blockSize)*ldV], 0, computeXR?blockNormsSize:0, ldV,
+               X?&X[(*blockSize)*ldV]:NULL, 0, computeXR?blockNormsSize:0, ldV,
                NULL, 0, 0, 0,
                NULL, 0, 0, 0,
                NULL, 0, 0, 0,
-               &R[(*blockSize)*ldV], 0, computeXR?blockNormsSize:0, ldV, computeXR?&blockNorms[*blockSize]:NULL,
-               &BX[(*blockSize)*ldV], 0, BX?blockNormsSize:0, ldV,
+               R?&R[(*blockSize)*ldV]:NULL, 0, computeXR?blockNormsSize:0, ldV, computeXR?&blockNorms[*blockSize]:NULL,
+               BX?&BX[(*blockSize)*ldV]:NULL, 0, BX?blockNormsSize:0, ldV,
                NULL, 0, 0, 0,
                NULL, 0, 0, 0,
                &blockNorms[*blockSize], 0, !computeXR?blockNormsSize:0,
                NULL, 0, 0,
                NULL, 0, 0,
-               &XNorms[*blockSize], 0, primme->massMatrixMatvec?blockNormsSize:0,
+               XNorms?&XNorms[*blockSize]:NULL, 0, primme->massMatrixMatvec?blockNormsSize:0,
                ctx));
 
       /* Don't trust residual norm smaller than the error in the residual norm */
@@ -1908,8 +1917,13 @@ STATIC int switch_from_GDpk(void *model_, primme_context ctx) {
    HREAL ratio;
 
    /* if no restart has occurred (only possible under dyn=3) current timings */
-   /* do not include restart costs. Remain with GD+k until a restart occurs */
-   if (primme->stats.numRestarts == 0) return 0;
+   /* do not include restart costs. Remain with GD+k until a restart occurs. */
+   /* If search space is going to saturate, just use GD for ever.            */
+   if (primme->stats.numRestarts == 0 ||
+         primme->maxBasisSize + (primme->locking ? primme->numEvals : 0) >=
+               primme->n) {
+      return 0;
+   }
 
    /* Select method to switch to if needed: 1->2 and 3->4 */
    switch (primme->dynamicMethodSwitch) {
@@ -2028,7 +2042,6 @@ STATIC int switch_from_GDpk(void *model_, primme_context ctx) {
  * calledAtRestart  True if update_statistics is called at restart by dyn=1
  * numConverged     Total number of converged pairs
  * currentResNorm   Residual norm of the next unconverged epair
- * aNormEst         Estimate of ||A||_2. Conv Tolerance = aNormEst*primme.eps
  *
  * INPUT/OUTPUT
  * ------------
@@ -2041,8 +2054,8 @@ STATIC int switch_from_GDpk(void *model_, primme_context ctx) {
  *
  ******************************************************************************/
 STATIC int update_statistics(void *model_, primme_params *primme,
-   double current_time, int recentConv, int calledAtRestart, int numConverged, 
-   double currentResNorm, double aNormEst) {
+      double current_time, int recentConv, int calledAtRestart,
+      int numConverged, double currentResNorm) {
 
    primme_CostModel *model = (primme_CostModel *)model_;
    double low_res, elapsed_time, time_in_outer, kinn;
@@ -2076,11 +2089,8 @@ STATIC int update_statistics(void *model_, primme_params *primme,
    /* Also, update how many evals each method found since last reset  */
    /* --------------------------------------------------------------- */
    if (recentConv > 0) {
-      /* Use tolerance as the lowest residual norm to estimate conv rate */
-      if (primme->aNorm > 0.0L) 
-         low_res = primme->eps*primme->aNorm;
-      else 
-         low_res = primme->eps*aNormEst;
+      /* Use tolerance as the largest residual norm of the converged pairs */
+      low_res = primme->stats.maxConvTol;
       /* Update num of evals found */
       if (primme->correctionParams.maxInnerIterations == -1)
           model->nevals_by_jdq += recentConv;

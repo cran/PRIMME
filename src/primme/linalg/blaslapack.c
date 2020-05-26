@@ -436,6 +436,10 @@ int Num_copy_matrix_Sprimme(SCALAR *x, PRIMME_INT m, PRIMME_INT n,
    if (x == y && ldx == ldy)
       return 0;
 
+   /* Do nothing for zero-size matrices */
+   if (m <= 0 || n <= 0)
+      return 0;
+
    /* Copy a contiguous memory region */
    if (ldx == ldy && ldx == m) {
       memmove(y, x, sizeof(SCALAR) * m * n);
@@ -980,38 +984,6 @@ int Num_scal_Sprimme(
 }
 
 /*******************************************************************************
- * Subroutine Num_swap_Sprimme - swap x(0:n*incx-1:incx) and y(0:n*incy-1:incy)
- ******************************************************************************/
- 
-TEMPLATE_PLEASE
-int Num_swap_Sprimme(PRIMME_INT n, SCALAR *x, int incx, SCALAR *y, int incy,
-      primme_context ctx) {
-
-   (void)ctx;
-#if (!defined(USE_HALF) && !defined(USE_HALFCOMPLEX)) || defined(BLASLAPACK_WITH_HALF)
-   PRIMME_BLASINT ln = n;
-   PRIMME_BLASINT lincx = incx;
-   PRIMME_BLASINT lincy = incy;
-
-   while(n > 0) {
-      ln = (PRIMME_BLASINT)min(n, PRIMME_BLASINT_MAX-1);
-      XSWAP(&ln, x, &lincx, y, &lincy);
-      n -= (PRIMME_INT)ln;
-      x += ln;
-      y += ln;
-   }
-#else
-   PRIMME_INT i;
-   for (i = 0; i < n; i++) {
-      HSCALAR a = TO_COMPLEX(x[incx * i]);
-      x[incx * i] = y[incy * i];
-      SET_COMPLEX(y[incy * i], a);
-   }
-#endif
-   return 0;
-}
-
-/*******************************************************************************
  * Subroutines for dense eigenvalue decomposition
  * NOTE: xheevx is used instead of xheev because xheev is not in ESSL
  ******************************************************************************/
@@ -1058,6 +1030,8 @@ int Num_heev_Sprimme(const char *jobz, const char *uplo, int n, SCALAR *a,
 #  endif
          iwork, ifail, &linfo);
    lldwork = REAL_PART(lwork0);
+   // ATLAS LAPACK and MacOS LAPACK may suggest a wrong value to lwork for n=1
+   if (lldwork < 2 * ln) lldwork = 2 * ln;
 
    if (linfo == 0) {
       SCALAR *work = NULL;

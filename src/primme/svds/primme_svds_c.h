@@ -36,7 +36,7 @@
 #if !defined(CHECK_TEMPLATE) && !defined(Xprimme_svds_aux)
 #  define Xprimme_svds_aux CONCAT(Xprimme_svds_aux,SCALAR_SUF)
 #endif
-int Xprimme_svds_auxdprimme(dummy_type_dprimme *svals, dummy_type_dprimme *svecs, dummy_type_dprimme *resNorms,
+int Xprimme_svds_auxdprimme(void *svals, dummy_type_dprimme *svecs, void *resNorms,
       primme_svds_params *primme_svds, primme_op_datatype svals_resNorms_type);
 #if !defined(CHECK_TEMPLATE) && !defined(wrapper_svds_Sprimme)
 #  define wrapper_svds_Sprimme CONCAT(wrapper_svds_,SCALAR_SUF)
@@ -150,17 +150,471 @@ int copy_last_params_to_svdsdprimme(int stage, dummy_type_dprimme *svals, dummy_
 #if !defined(CHECK_TEMPLATE) && !defined(primme_svds_check_input)
 #  define primme_svds_check_input CONCAT(primme_svds_check_input,SCALAR_SUF)
 #endif
-int primme_svds_check_inputdprimme(dummy_type_dprimme *svals, dummy_type_dprimme *svecs, dummy_type_dprimme *resNorms,
+int primme_svds_check_inputdprimme(void *svals, void *svecs, void *resNorms,
       primme_svds_params *primme_svds);
-#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS)
-#  define matrixMatvecSVDS CONCAT(matrixMatvecSVDS,SCALAR_SUF)
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_Sprimme)
+#  define matrixMatvecSVDS_Sprimme CONCAT(matrixMatvecSVDS_,SCALAR_SUF)
 #endif
-void matrixMatvecSVDSdprimme(void *x_, PRIMME_INT *ldx, void *y_,
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_Rprimme)
+#  define matrixMatvecSVDS_Rprimme CONCAT(matrixMatvecSVDS_,REAL_SUF)
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_SHprimme)
+#  define matrixMatvecSVDS_SHprimme CONCAT(matrixMatvecSVDS_,HOST_SCALAR_SUF)
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_RHprimme)
+#  define matrixMatvecSVDS_RHprimme CONCAT(matrixMatvecSVDS_,HOST_REAL_SUF)
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_SXprimme)
+#  define matrixMatvecSVDS_SXprimme CONCAT(matrixMatvecSVDS_,XSCALAR_SUF)
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_RXprimme)
+#  define matrixMatvecSVDS_RXprimme CONCAT(matrixMatvecSVDS_,XREAL_SUF)
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_Shprimme)
+#  define matrixMatvecSVDS_Shprimme CONCAT(matrixMatvecSVDS_,CONCAT(CONCAT(CONCAT(STEM_C,USE_ARITH(h,k)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_Rhprimme)
+#  define matrixMatvecSVDS_Rhprimme CONCAT(matrixMatvecSVDS_,CONCAT(CONCAT(CONCAT(STEM_C,h),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_Ssprimme)
+#  define matrixMatvecSVDS_Ssprimme CONCAT(matrixMatvecSVDS_,CONCAT(CONCAT(CONCAT(STEM_C,USE_ARITH(s,c)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_Rsprimme)
+#  define matrixMatvecSVDS_Rsprimme CONCAT(matrixMatvecSVDS_,CONCAT(CONCAT(CONCAT(STEM_C,s),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_Sdprimme)
+#  define matrixMatvecSVDS_Sdprimme CONCAT(matrixMatvecSVDS_,CONCAT(CONCAT(CONCAT(STEM_C,USE_ARITH(d,z)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_Rdprimme)
+#  define matrixMatvecSVDS_Rdprimme CONCAT(matrixMatvecSVDS_,CONCAT(CONCAT(CONCAT(STEM_C,d),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_Sqprimme)
+#  define matrixMatvecSVDS_Sqprimme CONCAT(matrixMatvecSVDS_,CONCAT(CONCAT(CONCAT(STEM_C,USE_ARITH(q,w)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_Rqprimme)
+#  define matrixMatvecSVDS_Rqprimme CONCAT(matrixMatvecSVDS_,CONCAT(CONCAT(CONCAT(STEM_C,q),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_SXhprimme)
+#  define matrixMatvecSVDS_SXhprimme CONCAT(matrixMatvecSVDS_,CONCAT(CONCAT(CONCAT(,USE_ARITH(h,k)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_RXhprimme)
+#  define matrixMatvecSVDS_RXhprimme CONCAT(matrixMatvecSVDS_,CONCAT(CONCAT(CONCAT(,h),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_SXsprimme)
+#  define matrixMatvecSVDS_SXsprimme CONCAT(matrixMatvecSVDS_,CONCAT(CONCAT(CONCAT(,USE_ARITH(s,c)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_RXsprimme)
+#  define matrixMatvecSVDS_RXsprimme CONCAT(matrixMatvecSVDS_,CONCAT(CONCAT(CONCAT(,s),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_SXdprimme)
+#  define matrixMatvecSVDS_SXdprimme CONCAT(matrixMatvecSVDS_,CONCAT(CONCAT(CONCAT(,USE_ARITH(d,z)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_RXdprimme)
+#  define matrixMatvecSVDS_RXdprimme CONCAT(matrixMatvecSVDS_,CONCAT(CONCAT(CONCAT(,d),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_SXqprimme)
+#  define matrixMatvecSVDS_SXqprimme CONCAT(matrixMatvecSVDS_,CONCAT(CONCAT(CONCAT(,USE_ARITH(q,w)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_RXqprimme)
+#  define matrixMatvecSVDS_RXqprimme CONCAT(matrixMatvecSVDS_,CONCAT(CONCAT(CONCAT(,q),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_SHhprimme)
+#  define matrixMatvecSVDS_SHhprimme CONCAT(matrixMatvecSVDS_,CONCAT(CONCAT(CONCAT(,USE_ARITH(s,c)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_RHhprimme)
+#  define matrixMatvecSVDS_RHhprimme CONCAT(matrixMatvecSVDS_,CONCAT(CONCAT(CONCAT(,s),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_SHsprimme)
+#  define matrixMatvecSVDS_SHsprimme CONCAT(matrixMatvecSVDS_,CONCAT(CONCAT(CONCAT(,USE_ARITH(s,c)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_RHsprimme)
+#  define matrixMatvecSVDS_RHsprimme CONCAT(matrixMatvecSVDS_,CONCAT(CONCAT(CONCAT(,s),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_SHdprimme)
+#  define matrixMatvecSVDS_SHdprimme CONCAT(matrixMatvecSVDS_,CONCAT(CONCAT(CONCAT(,USE_ARITH(d,z)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_RHdprimme)
+#  define matrixMatvecSVDS_RHdprimme CONCAT(matrixMatvecSVDS_,CONCAT(CONCAT(CONCAT(,d),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_SHqprimme)
+#  define matrixMatvecSVDS_SHqprimme CONCAT(matrixMatvecSVDS_,CONCAT(CONCAT(CONCAT(,USE_ARITH(q,w)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvecSVDS_RHqprimme)
+#  define matrixMatvecSVDS_RHqprimme CONCAT(matrixMatvecSVDS_,CONCAT(CONCAT(CONCAT(,q),primme),))
+#endif
+int matrixMatvecSVDS_dprimme(dummy_type_dprimme *V, PRIMME_INT ldV, dummy_type_dprimme *W, PRIMME_INT ldW,
+      int basisSize, int blockSize, int conj, primme_context ctx);
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_Sprimme)
+#  define convTestFunSVDS_Sprimme CONCAT(convTestFunSVDS_,SCALAR_SUF)
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_Rprimme)
+#  define convTestFunSVDS_Rprimme CONCAT(convTestFunSVDS_,REAL_SUF)
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_SHprimme)
+#  define convTestFunSVDS_SHprimme CONCAT(convTestFunSVDS_,HOST_SCALAR_SUF)
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_RHprimme)
+#  define convTestFunSVDS_RHprimme CONCAT(convTestFunSVDS_,HOST_REAL_SUF)
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_SXprimme)
+#  define convTestFunSVDS_SXprimme CONCAT(convTestFunSVDS_,XSCALAR_SUF)
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_RXprimme)
+#  define convTestFunSVDS_RXprimme CONCAT(convTestFunSVDS_,XREAL_SUF)
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_Shprimme)
+#  define convTestFunSVDS_Shprimme CONCAT(convTestFunSVDS_,CONCAT(CONCAT(CONCAT(STEM_C,USE_ARITH(h,k)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_Rhprimme)
+#  define convTestFunSVDS_Rhprimme CONCAT(convTestFunSVDS_,CONCAT(CONCAT(CONCAT(STEM_C,h),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_Ssprimme)
+#  define convTestFunSVDS_Ssprimme CONCAT(convTestFunSVDS_,CONCAT(CONCAT(CONCAT(STEM_C,USE_ARITH(s,c)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_Rsprimme)
+#  define convTestFunSVDS_Rsprimme CONCAT(convTestFunSVDS_,CONCAT(CONCAT(CONCAT(STEM_C,s),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_Sdprimme)
+#  define convTestFunSVDS_Sdprimme CONCAT(convTestFunSVDS_,CONCAT(CONCAT(CONCAT(STEM_C,USE_ARITH(d,z)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_Rdprimme)
+#  define convTestFunSVDS_Rdprimme CONCAT(convTestFunSVDS_,CONCAT(CONCAT(CONCAT(STEM_C,d),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_Sqprimme)
+#  define convTestFunSVDS_Sqprimme CONCAT(convTestFunSVDS_,CONCAT(CONCAT(CONCAT(STEM_C,USE_ARITH(q,w)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_Rqprimme)
+#  define convTestFunSVDS_Rqprimme CONCAT(convTestFunSVDS_,CONCAT(CONCAT(CONCAT(STEM_C,q),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_SXhprimme)
+#  define convTestFunSVDS_SXhprimme CONCAT(convTestFunSVDS_,CONCAT(CONCAT(CONCAT(,USE_ARITH(h,k)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_RXhprimme)
+#  define convTestFunSVDS_RXhprimme CONCAT(convTestFunSVDS_,CONCAT(CONCAT(CONCAT(,h),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_SXsprimme)
+#  define convTestFunSVDS_SXsprimme CONCAT(convTestFunSVDS_,CONCAT(CONCAT(CONCAT(,USE_ARITH(s,c)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_RXsprimme)
+#  define convTestFunSVDS_RXsprimme CONCAT(convTestFunSVDS_,CONCAT(CONCAT(CONCAT(,s),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_SXdprimme)
+#  define convTestFunSVDS_SXdprimme CONCAT(convTestFunSVDS_,CONCAT(CONCAT(CONCAT(,USE_ARITH(d,z)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_RXdprimme)
+#  define convTestFunSVDS_RXdprimme CONCAT(convTestFunSVDS_,CONCAT(CONCAT(CONCAT(,d),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_SXqprimme)
+#  define convTestFunSVDS_SXqprimme CONCAT(convTestFunSVDS_,CONCAT(CONCAT(CONCAT(,USE_ARITH(q,w)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_RXqprimme)
+#  define convTestFunSVDS_RXqprimme CONCAT(convTestFunSVDS_,CONCAT(CONCAT(CONCAT(,q),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_SHhprimme)
+#  define convTestFunSVDS_SHhprimme CONCAT(convTestFunSVDS_,CONCAT(CONCAT(CONCAT(,USE_ARITH(s,c)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_RHhprimme)
+#  define convTestFunSVDS_RHhprimme CONCAT(convTestFunSVDS_,CONCAT(CONCAT(CONCAT(,s),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_SHsprimme)
+#  define convTestFunSVDS_SHsprimme CONCAT(convTestFunSVDS_,CONCAT(CONCAT(CONCAT(,USE_ARITH(s,c)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_RHsprimme)
+#  define convTestFunSVDS_RHsprimme CONCAT(convTestFunSVDS_,CONCAT(CONCAT(CONCAT(,s),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_SHdprimme)
+#  define convTestFunSVDS_SHdprimme CONCAT(convTestFunSVDS_,CONCAT(CONCAT(CONCAT(,USE_ARITH(d,z)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_RHdprimme)
+#  define convTestFunSVDS_RHdprimme CONCAT(convTestFunSVDS_,CONCAT(CONCAT(CONCAT(,d),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_SHqprimme)
+#  define convTestFunSVDS_SHqprimme CONCAT(convTestFunSVDS_,CONCAT(CONCAT(CONCAT(,USE_ARITH(q,w)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(convTestFunSVDS_RHqprimme)
+#  define convTestFunSVDS_RHqprimme CONCAT(convTestFunSVDS_,CONCAT(CONCAT(CONCAT(,q),primme),))
+#endif
+int convTestFunSVDS_dprimme(dummy_type_dprimme sval, dummy_type_dprimme *leftsvec, int givenLeftSvec,
+      dummy_type_dprimme *rightsvec, int givenRightSvec, dummy_type_dprimme rNorm, int method,
+      int *isconv, primme_context ctx);
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_Sprimme)
+#  define monitorFunSVDS_Sprimme CONCAT(monitorFunSVDS_,SCALAR_SUF)
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_Rprimme)
+#  define monitorFunSVDS_Rprimme CONCAT(monitorFunSVDS_,REAL_SUF)
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_SHprimme)
+#  define monitorFunSVDS_SHprimme CONCAT(monitorFunSVDS_,HOST_SCALAR_SUF)
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_RHprimme)
+#  define monitorFunSVDS_RHprimme CONCAT(monitorFunSVDS_,HOST_REAL_SUF)
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_SXprimme)
+#  define monitorFunSVDS_SXprimme CONCAT(monitorFunSVDS_,XSCALAR_SUF)
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_RXprimme)
+#  define monitorFunSVDS_RXprimme CONCAT(monitorFunSVDS_,XREAL_SUF)
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_Shprimme)
+#  define monitorFunSVDS_Shprimme CONCAT(monitorFunSVDS_,CONCAT(CONCAT(CONCAT(STEM_C,USE_ARITH(h,k)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_Rhprimme)
+#  define monitorFunSVDS_Rhprimme CONCAT(monitorFunSVDS_,CONCAT(CONCAT(CONCAT(STEM_C,h),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_Ssprimme)
+#  define monitorFunSVDS_Ssprimme CONCAT(monitorFunSVDS_,CONCAT(CONCAT(CONCAT(STEM_C,USE_ARITH(s,c)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_Rsprimme)
+#  define monitorFunSVDS_Rsprimme CONCAT(monitorFunSVDS_,CONCAT(CONCAT(CONCAT(STEM_C,s),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_Sdprimme)
+#  define monitorFunSVDS_Sdprimme CONCAT(monitorFunSVDS_,CONCAT(CONCAT(CONCAT(STEM_C,USE_ARITH(d,z)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_Rdprimme)
+#  define monitorFunSVDS_Rdprimme CONCAT(monitorFunSVDS_,CONCAT(CONCAT(CONCAT(STEM_C,d),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_Sqprimme)
+#  define monitorFunSVDS_Sqprimme CONCAT(monitorFunSVDS_,CONCAT(CONCAT(CONCAT(STEM_C,USE_ARITH(q,w)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_Rqprimme)
+#  define monitorFunSVDS_Rqprimme CONCAT(monitorFunSVDS_,CONCAT(CONCAT(CONCAT(STEM_C,q),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_SXhprimme)
+#  define monitorFunSVDS_SXhprimme CONCAT(monitorFunSVDS_,CONCAT(CONCAT(CONCAT(,USE_ARITH(h,k)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_RXhprimme)
+#  define monitorFunSVDS_RXhprimme CONCAT(monitorFunSVDS_,CONCAT(CONCAT(CONCAT(,h),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_SXsprimme)
+#  define monitorFunSVDS_SXsprimme CONCAT(monitorFunSVDS_,CONCAT(CONCAT(CONCAT(,USE_ARITH(s,c)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_RXsprimme)
+#  define monitorFunSVDS_RXsprimme CONCAT(monitorFunSVDS_,CONCAT(CONCAT(CONCAT(,s),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_SXdprimme)
+#  define monitorFunSVDS_SXdprimme CONCAT(monitorFunSVDS_,CONCAT(CONCAT(CONCAT(,USE_ARITH(d,z)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_RXdprimme)
+#  define monitorFunSVDS_RXdprimme CONCAT(monitorFunSVDS_,CONCAT(CONCAT(CONCAT(,d),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_SXqprimme)
+#  define monitorFunSVDS_SXqprimme CONCAT(monitorFunSVDS_,CONCAT(CONCAT(CONCAT(,USE_ARITH(q,w)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_RXqprimme)
+#  define monitorFunSVDS_RXqprimme CONCAT(monitorFunSVDS_,CONCAT(CONCAT(CONCAT(,q),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_SHhprimme)
+#  define monitorFunSVDS_SHhprimme CONCAT(monitorFunSVDS_,CONCAT(CONCAT(CONCAT(,USE_ARITH(s,c)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_RHhprimme)
+#  define monitorFunSVDS_RHhprimme CONCAT(monitorFunSVDS_,CONCAT(CONCAT(CONCAT(,s),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_SHsprimme)
+#  define monitorFunSVDS_SHsprimme CONCAT(monitorFunSVDS_,CONCAT(CONCAT(CONCAT(,USE_ARITH(s,c)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_RHsprimme)
+#  define monitorFunSVDS_RHsprimme CONCAT(monitorFunSVDS_,CONCAT(CONCAT(CONCAT(,s),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_SHdprimme)
+#  define monitorFunSVDS_SHdprimme CONCAT(monitorFunSVDS_,CONCAT(CONCAT(CONCAT(,USE_ARITH(d,z)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_RHdprimme)
+#  define monitorFunSVDS_RHdprimme CONCAT(monitorFunSVDS_,CONCAT(CONCAT(CONCAT(,d),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_SHqprimme)
+#  define monitorFunSVDS_SHqprimme CONCAT(monitorFunSVDS_,CONCAT(CONCAT(CONCAT(,USE_ARITH(q,w)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(monitorFunSVDS_RHqprimme)
+#  define monitorFunSVDS_RHqprimme CONCAT(monitorFunSVDS_,CONCAT(CONCAT(CONCAT(,q),primme),))
+#endif
+int monitorFunSVDS_dprimme(dummy_type_dprimme *basisSvals, int basisSize, int *basisFlags,
+      int *iblock, int blockSize, dummy_type_dprimme *basisNorms, int numConverged,
+      dummy_type_dprimme *lockedSvals, int numLocked, int *lockedFlags, dummy_type_dprimme *lockedNorms,
+      int inner_its, dummy_type_dprimme LSRes, const char *msg, double time,
+      primme_event event, int stage, double startTime, primme_context ctx);
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_Sprimme)
+#  define matrixMatvec_eigs_Sprimme CONCAT(matrixMatvec_eigs_,SCALAR_SUF)
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_Rprimme)
+#  define matrixMatvec_eigs_Rprimme CONCAT(matrixMatvec_eigs_,REAL_SUF)
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_SHprimme)
+#  define matrixMatvec_eigs_SHprimme CONCAT(matrixMatvec_eigs_,HOST_SCALAR_SUF)
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_RHprimme)
+#  define matrixMatvec_eigs_RHprimme CONCAT(matrixMatvec_eigs_,HOST_REAL_SUF)
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_SXprimme)
+#  define matrixMatvec_eigs_SXprimme CONCAT(matrixMatvec_eigs_,XSCALAR_SUF)
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_RXprimme)
+#  define matrixMatvec_eigs_RXprimme CONCAT(matrixMatvec_eigs_,XREAL_SUF)
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_Shprimme)
+#  define matrixMatvec_eigs_Shprimme CONCAT(matrixMatvec_eigs_,CONCAT(CONCAT(CONCAT(STEM_C,USE_ARITH(h,k)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_Rhprimme)
+#  define matrixMatvec_eigs_Rhprimme CONCAT(matrixMatvec_eigs_,CONCAT(CONCAT(CONCAT(STEM_C,h),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_Ssprimme)
+#  define matrixMatvec_eigs_Ssprimme CONCAT(matrixMatvec_eigs_,CONCAT(CONCAT(CONCAT(STEM_C,USE_ARITH(s,c)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_Rsprimme)
+#  define matrixMatvec_eigs_Rsprimme CONCAT(matrixMatvec_eigs_,CONCAT(CONCAT(CONCAT(STEM_C,s),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_Sdprimme)
+#  define matrixMatvec_eigs_Sdprimme CONCAT(matrixMatvec_eigs_,CONCAT(CONCAT(CONCAT(STEM_C,USE_ARITH(d,z)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_Rdprimme)
+#  define matrixMatvec_eigs_Rdprimme CONCAT(matrixMatvec_eigs_,CONCAT(CONCAT(CONCAT(STEM_C,d),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_Sqprimme)
+#  define matrixMatvec_eigs_Sqprimme CONCAT(matrixMatvec_eigs_,CONCAT(CONCAT(CONCAT(STEM_C,USE_ARITH(q,w)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_Rqprimme)
+#  define matrixMatvec_eigs_Rqprimme CONCAT(matrixMatvec_eigs_,CONCAT(CONCAT(CONCAT(STEM_C,q),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_SXhprimme)
+#  define matrixMatvec_eigs_SXhprimme CONCAT(matrixMatvec_eigs_,CONCAT(CONCAT(CONCAT(,USE_ARITH(h,k)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_RXhprimme)
+#  define matrixMatvec_eigs_RXhprimme CONCAT(matrixMatvec_eigs_,CONCAT(CONCAT(CONCAT(,h),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_SXsprimme)
+#  define matrixMatvec_eigs_SXsprimme CONCAT(matrixMatvec_eigs_,CONCAT(CONCAT(CONCAT(,USE_ARITH(s,c)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_RXsprimme)
+#  define matrixMatvec_eigs_RXsprimme CONCAT(matrixMatvec_eigs_,CONCAT(CONCAT(CONCAT(,s),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_SXdprimme)
+#  define matrixMatvec_eigs_SXdprimme CONCAT(matrixMatvec_eigs_,CONCAT(CONCAT(CONCAT(,USE_ARITH(d,z)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_RXdprimme)
+#  define matrixMatvec_eigs_RXdprimme CONCAT(matrixMatvec_eigs_,CONCAT(CONCAT(CONCAT(,d),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_SXqprimme)
+#  define matrixMatvec_eigs_SXqprimme CONCAT(matrixMatvec_eigs_,CONCAT(CONCAT(CONCAT(,USE_ARITH(q,w)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_RXqprimme)
+#  define matrixMatvec_eigs_RXqprimme CONCAT(matrixMatvec_eigs_,CONCAT(CONCAT(CONCAT(,q),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_SHhprimme)
+#  define matrixMatvec_eigs_SHhprimme CONCAT(matrixMatvec_eigs_,CONCAT(CONCAT(CONCAT(,USE_ARITH(s,c)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_RHhprimme)
+#  define matrixMatvec_eigs_RHhprimme CONCAT(matrixMatvec_eigs_,CONCAT(CONCAT(CONCAT(,s),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_SHsprimme)
+#  define matrixMatvec_eigs_SHsprimme CONCAT(matrixMatvec_eigs_,CONCAT(CONCAT(CONCAT(,USE_ARITH(s,c)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_RHsprimme)
+#  define matrixMatvec_eigs_RHsprimme CONCAT(matrixMatvec_eigs_,CONCAT(CONCAT(CONCAT(,s),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_SHdprimme)
+#  define matrixMatvec_eigs_SHdprimme CONCAT(matrixMatvec_eigs_,CONCAT(CONCAT(CONCAT(,USE_ARITH(d,z)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_RHdprimme)
+#  define matrixMatvec_eigs_RHdprimme CONCAT(matrixMatvec_eigs_,CONCAT(CONCAT(CONCAT(,d),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_SHqprimme)
+#  define matrixMatvec_eigs_SHqprimme CONCAT(matrixMatvec_eigs_,CONCAT(CONCAT(CONCAT(,USE_ARITH(q,w)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(matrixMatvec_eigs_RHqprimme)
+#  define matrixMatvec_eigs_RHqprimme CONCAT(matrixMatvec_eigs_,CONCAT(CONCAT(CONCAT(,q),primme),))
+#endif
+void matrixMatvec_eigs_dprimme(void *x_, PRIMME_INT *ldx, void *y_,
       PRIMME_INT *ldy, int *blockSize, primme_params *primme, int *ierr);
-#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditionerSVDS)
-#  define applyPreconditionerSVDS CONCAT(applyPreconditionerSVDS,SCALAR_SUF)
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_Sprimme)
+#  define applyPreconditioner_eigs_Sprimme CONCAT(applyPreconditioner_eigs_,SCALAR_SUF)
 #endif
-void applyPreconditionerSVDSdprimme(void *x, PRIMME_INT *ldx, void *y,
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_Rprimme)
+#  define applyPreconditioner_eigs_Rprimme CONCAT(applyPreconditioner_eigs_,REAL_SUF)
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_SHprimme)
+#  define applyPreconditioner_eigs_SHprimme CONCAT(applyPreconditioner_eigs_,HOST_SCALAR_SUF)
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_RHprimme)
+#  define applyPreconditioner_eigs_RHprimme CONCAT(applyPreconditioner_eigs_,HOST_REAL_SUF)
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_SXprimme)
+#  define applyPreconditioner_eigs_SXprimme CONCAT(applyPreconditioner_eigs_,XSCALAR_SUF)
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_RXprimme)
+#  define applyPreconditioner_eigs_RXprimme CONCAT(applyPreconditioner_eigs_,XREAL_SUF)
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_Shprimme)
+#  define applyPreconditioner_eigs_Shprimme CONCAT(applyPreconditioner_eigs_,CONCAT(CONCAT(CONCAT(STEM_C,USE_ARITH(h,k)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_Rhprimme)
+#  define applyPreconditioner_eigs_Rhprimme CONCAT(applyPreconditioner_eigs_,CONCAT(CONCAT(CONCAT(STEM_C,h),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_Ssprimme)
+#  define applyPreconditioner_eigs_Ssprimme CONCAT(applyPreconditioner_eigs_,CONCAT(CONCAT(CONCAT(STEM_C,USE_ARITH(s,c)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_Rsprimme)
+#  define applyPreconditioner_eigs_Rsprimme CONCAT(applyPreconditioner_eigs_,CONCAT(CONCAT(CONCAT(STEM_C,s),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_Sdprimme)
+#  define applyPreconditioner_eigs_Sdprimme CONCAT(applyPreconditioner_eigs_,CONCAT(CONCAT(CONCAT(STEM_C,USE_ARITH(d,z)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_Rdprimme)
+#  define applyPreconditioner_eigs_Rdprimme CONCAT(applyPreconditioner_eigs_,CONCAT(CONCAT(CONCAT(STEM_C,d),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_Sqprimme)
+#  define applyPreconditioner_eigs_Sqprimme CONCAT(applyPreconditioner_eigs_,CONCAT(CONCAT(CONCAT(STEM_C,USE_ARITH(q,w)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_Rqprimme)
+#  define applyPreconditioner_eigs_Rqprimme CONCAT(applyPreconditioner_eigs_,CONCAT(CONCAT(CONCAT(STEM_C,q),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_SXhprimme)
+#  define applyPreconditioner_eigs_SXhprimme CONCAT(applyPreconditioner_eigs_,CONCAT(CONCAT(CONCAT(,USE_ARITH(h,k)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_RXhprimme)
+#  define applyPreconditioner_eigs_RXhprimme CONCAT(applyPreconditioner_eigs_,CONCAT(CONCAT(CONCAT(,h),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_SXsprimme)
+#  define applyPreconditioner_eigs_SXsprimme CONCAT(applyPreconditioner_eigs_,CONCAT(CONCAT(CONCAT(,USE_ARITH(s,c)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_RXsprimme)
+#  define applyPreconditioner_eigs_RXsprimme CONCAT(applyPreconditioner_eigs_,CONCAT(CONCAT(CONCAT(,s),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_SXdprimme)
+#  define applyPreconditioner_eigs_SXdprimme CONCAT(applyPreconditioner_eigs_,CONCAT(CONCAT(CONCAT(,USE_ARITH(d,z)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_RXdprimme)
+#  define applyPreconditioner_eigs_RXdprimme CONCAT(applyPreconditioner_eigs_,CONCAT(CONCAT(CONCAT(,d),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_SXqprimme)
+#  define applyPreconditioner_eigs_SXqprimme CONCAT(applyPreconditioner_eigs_,CONCAT(CONCAT(CONCAT(,USE_ARITH(q,w)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_RXqprimme)
+#  define applyPreconditioner_eigs_RXqprimme CONCAT(applyPreconditioner_eigs_,CONCAT(CONCAT(CONCAT(,q),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_SHhprimme)
+#  define applyPreconditioner_eigs_SHhprimme CONCAT(applyPreconditioner_eigs_,CONCAT(CONCAT(CONCAT(,USE_ARITH(s,c)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_RHhprimme)
+#  define applyPreconditioner_eigs_RHhprimme CONCAT(applyPreconditioner_eigs_,CONCAT(CONCAT(CONCAT(,s),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_SHsprimme)
+#  define applyPreconditioner_eigs_SHsprimme CONCAT(applyPreconditioner_eigs_,CONCAT(CONCAT(CONCAT(,USE_ARITH(s,c)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_RHsprimme)
+#  define applyPreconditioner_eigs_RHsprimme CONCAT(applyPreconditioner_eigs_,CONCAT(CONCAT(CONCAT(,s),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_SHdprimme)
+#  define applyPreconditioner_eigs_SHdprimme CONCAT(applyPreconditioner_eigs_,CONCAT(CONCAT(CONCAT(,USE_ARITH(d,z)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_RHdprimme)
+#  define applyPreconditioner_eigs_RHdprimme CONCAT(applyPreconditioner_eigs_,CONCAT(CONCAT(CONCAT(,d),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_SHqprimme)
+#  define applyPreconditioner_eigs_SHqprimme CONCAT(applyPreconditioner_eigs_,CONCAT(CONCAT(CONCAT(,USE_ARITH(q,w)),primme),))
+#endif
+#if !defined(CHECK_TEMPLATE) && !defined(applyPreconditioner_eigs_RHqprimme)
+#  define applyPreconditioner_eigs_RHqprimme CONCAT(applyPreconditioner_eigs_,CONCAT(CONCAT(CONCAT(,q),primme),))
+#endif
+void applyPreconditioner_eigs_dprimme(void *x, PRIMME_INT *ldx, void *y,
       PRIMME_INT *ldy, int *blockSize, primme_params *primme, int *ierr);
 #if !defined(CHECK_TEMPLATE) && !defined(Num_scalInv_Smatrix)
 #  define Num_scalInv_Smatrix CONCAT(Num_scalInv_Smatrix,SCALAR_SUF)
@@ -226,26 +680,36 @@ void monitor_stage2dprimme(void *basisEvals_, int *basisSize, int *basisFlags,
       void *lockedEvals_, int *numLocked, int *lockedFlags, void *lockedNorms_,
       int *inner_its, void *LSRes_, const char *msg, double *time,
       primme_event *event, primme_params *primme, int *err);
-int Xprimme_svds_auxhprimme(dummy_type_hprimme *svals, dummy_type_hprimme *svecs, dummy_type_hprimme *resNorms,
+int Xprimme_svds_auxhprimme(void *svals, dummy_type_hprimme *svecs, void *resNorms,
       primme_svds_params *primme_svds, primme_op_datatype svals_resNorms_type);
 int wrapper_svds_hprimme(void *svals_, void *svecs_, void *resNorms_,
       primme_op_datatype svals_resNorms_type, primme_op_datatype svecs_type,
       int *outInitSize, primme_context ctx);
 int comp_doublehprimme(const void *a, const void *b);
-int copy_last_params_from_svdshprimme(int stage, dummy_type_hprimme *svals, dummy_type_hprimme *svecs,
-      dummy_type_hprimme *rnorms, int *allocatedTargetShifts,
+int copy_last_params_from_svdshprimme(int stage, dummy_type_sprimme *svals, dummy_type_hprimme *svecs,
+      dummy_type_sprimme *rnorms, int *allocatedTargetShifts,
       dummy_type_hprimme **out_svecs, primme_context ctx);
-int copy_last_params_to_svdshprimme(int stage, dummy_type_hprimme *svals, dummy_type_hprimme *svecs,
-      dummy_type_hprimme *rnorms, int allocatedTargetShifts,
+int copy_last_params_to_svdshprimme(int stage, dummy_type_sprimme *svals, dummy_type_hprimme *svecs,
+      dummy_type_sprimme *rnorms, int allocatedTargetShifts,
       primme_context ctx);
-int primme_svds_check_inputhprimme(dummy_type_hprimme *svals, dummy_type_hprimme *svecs, dummy_type_hprimme *resNorms,
+int primme_svds_check_inputhprimme(void *svals, void *svecs, void *resNorms,
       primme_svds_params *primme_svds);
-void matrixMatvecSVDShprimme(void *x_, PRIMME_INT *ldx, void *y_,
+int matrixMatvecSVDS_hprimme(dummy_type_hprimme *V, PRIMME_INT ldV, dummy_type_hprimme *W, PRIMME_INT ldW,
+      int basisSize, int blockSize, int conj, primme_context ctx);
+int convTestFunSVDS_hprimme(dummy_type_sprimme sval, dummy_type_hprimme *leftsvec, int givenLeftSvec,
+      dummy_type_hprimme *rightsvec, int givenRightSvec, dummy_type_sprimme rNorm, int method,
+      int *isconv, primme_context ctx);
+int monitorFunSVDS_hprimme(dummy_type_sprimme *basisSvals, int basisSize, int *basisFlags,
+      int *iblock, int blockSize, dummy_type_sprimme *basisNorms, int numConverged,
+      dummy_type_sprimme *lockedSvals, int numLocked, int *lockedFlags, dummy_type_sprimme *lockedNorms,
+      int inner_its, dummy_type_sprimme LSRes, const char *msg, double time,
+      primme_event event, int stage, double startTime, primme_context ctx);
+void matrixMatvec_eigs_hprimme(void *x_, PRIMME_INT *ldx, void *y_,
       PRIMME_INT *ldy, int *blockSize, primme_params *primme, int *ierr);
-void applyPreconditionerSVDShprimme(void *x, PRIMME_INT *ldx, void *y,
+void applyPreconditioner_eigs_hprimme(void *x, PRIMME_INT *ldx, void *y,
       PRIMME_INT *ldy, int *blockSize, primme_params *primme, int *ierr);
 int Num_scalInv_Smatrixhprimme(dummy_type_hprimme *x, PRIMME_INT m, int n, PRIMME_INT ldx,
-      dummy_type_hprimme *factors, primme_context ctx);
+      dummy_type_sprimme *factors, primme_context ctx);
 int globalSum_Rprimme_svdshprimme(
       dummy_type_sprimme *sendBuf, dummy_type_sprimme *recvBuf, int count, primme_context ctx);
 int compute_resNormhprimme(dummy_type_hprimme *leftsvec, dummy_type_hprimme *rightsvec, dummy_type_sprimme *rNorm,
@@ -278,26 +742,36 @@ void monitor_stage2hprimme(void *basisEvals_, int *basisSize, int *basisFlags,
       void *lockedEvals_, int *numLocked, int *lockedFlags, void *lockedNorms_,
       int *inner_its, void *LSRes_, const char *msg, double *time,
       primme_event *event, primme_params *primme, int *err);
-int Xprimme_svds_auxkprimme(dummy_type_hprimme *svals, dummy_type_kprimme *svecs, dummy_type_hprimme *resNorms,
+int Xprimme_svds_auxkprimme(void *svals, dummy_type_kprimme *svecs, void *resNorms,
       primme_svds_params *primme_svds, primme_op_datatype svals_resNorms_type);
 int wrapper_svds_kprimme(void *svals_, void *svecs_, void *resNorms_,
       primme_op_datatype svals_resNorms_type, primme_op_datatype svecs_type,
       int *outInitSize, primme_context ctx);
 int comp_doublekprimme(const void *a, const void *b);
-int copy_last_params_from_svdskprimme(int stage, dummy_type_hprimme *svals, dummy_type_kprimme *svecs,
-      dummy_type_hprimme *rnorms, int *allocatedTargetShifts,
+int copy_last_params_from_svdskprimme(int stage, dummy_type_sprimme *svals, dummy_type_kprimme *svecs,
+      dummy_type_sprimme *rnorms, int *allocatedTargetShifts,
       dummy_type_kprimme **out_svecs, primme_context ctx);
-int copy_last_params_to_svdskprimme(int stage, dummy_type_hprimme *svals, dummy_type_kprimme *svecs,
-      dummy_type_hprimme *rnorms, int allocatedTargetShifts,
+int copy_last_params_to_svdskprimme(int stage, dummy_type_sprimme *svals, dummy_type_kprimme *svecs,
+      dummy_type_sprimme *rnorms, int allocatedTargetShifts,
       primme_context ctx);
-int primme_svds_check_inputkprimme(dummy_type_hprimme *svals, dummy_type_kprimme *svecs, dummy_type_hprimme *resNorms,
+int primme_svds_check_inputkprimme(void *svals, void *svecs, void *resNorms,
       primme_svds_params *primme_svds);
-void matrixMatvecSVDSkprimme(void *x_, PRIMME_INT *ldx, void *y_,
+int matrixMatvecSVDS_kprimme(dummy_type_kprimme *V, PRIMME_INT ldV, dummy_type_kprimme *W, PRIMME_INT ldW,
+      int basisSize, int blockSize, int conj, primme_context ctx);
+int convTestFunSVDS_kprimme(dummy_type_sprimme sval, dummy_type_kprimme *leftsvec, int givenLeftSvec,
+      dummy_type_kprimme *rightsvec, int givenRightSvec, dummy_type_sprimme rNorm, int method,
+      int *isconv, primme_context ctx);
+int monitorFunSVDS_kprimme(dummy_type_sprimme *basisSvals, int basisSize, int *basisFlags,
+      int *iblock, int blockSize, dummy_type_sprimme *basisNorms, int numConverged,
+      dummy_type_sprimme *lockedSvals, int numLocked, int *lockedFlags, dummy_type_sprimme *lockedNorms,
+      int inner_its, dummy_type_sprimme LSRes, const char *msg, double time,
+      primme_event event, int stage, double startTime, primme_context ctx);
+void matrixMatvec_eigs_kprimme(void *x_, PRIMME_INT *ldx, void *y_,
       PRIMME_INT *ldy, int *blockSize, primme_params *primme, int *ierr);
-void applyPreconditionerSVDSkprimme(void *x, PRIMME_INT *ldx, void *y,
+void applyPreconditioner_eigs_kprimme(void *x, PRIMME_INT *ldx, void *y,
       PRIMME_INT *ldy, int *blockSize, primme_params *primme, int *ierr);
 int Num_scalInv_Smatrixkprimme(dummy_type_kprimme *x, PRIMME_INT m, int n, PRIMME_INT ldx,
-      dummy_type_hprimme *factors, primme_context ctx);
+      dummy_type_sprimme *factors, primme_context ctx);
 int globalSum_Rprimme_svdskprimme(
       dummy_type_sprimme *sendBuf, dummy_type_sprimme *recvBuf, int count, primme_context ctx);
 int compute_resNormkprimme(dummy_type_kprimme *leftsvec, dummy_type_kprimme *rightsvec, dummy_type_sprimme *rNorm,
@@ -330,7 +804,7 @@ void monitor_stage2kprimme(void *basisEvals_, int *basisSize, int *basisFlags,
       void *lockedEvals_, int *numLocked, int *lockedFlags, void *lockedNorms_,
       int *inner_its, void *LSRes_, const char *msg, double *time,
       primme_event *event, primme_params *primme, int *err);
-int Xprimme_svds_auxsprimme(dummy_type_sprimme *svals, dummy_type_sprimme *svecs, dummy_type_sprimme *resNorms,
+int Xprimme_svds_auxsprimme(void *svals, dummy_type_sprimme *svecs, void *resNorms,
       primme_svds_params *primme_svds, primme_op_datatype svals_resNorms_type);
 int wrapper_svds_sprimme(void *svals_, void *svecs_, void *resNorms_,
       primme_op_datatype svals_resNorms_type, primme_op_datatype svecs_type,
@@ -342,11 +816,21 @@ int copy_last_params_from_svdssprimme(int stage, dummy_type_sprimme *svals, dumm
 int copy_last_params_to_svdssprimme(int stage, dummy_type_sprimme *svals, dummy_type_sprimme *svecs,
       dummy_type_sprimme *rnorms, int allocatedTargetShifts,
       primme_context ctx);
-int primme_svds_check_inputsprimme(dummy_type_sprimme *svals, dummy_type_sprimme *svecs, dummy_type_sprimme *resNorms,
+int primme_svds_check_inputsprimme(void *svals, void *svecs, void *resNorms,
       primme_svds_params *primme_svds);
-void matrixMatvecSVDSsprimme(void *x_, PRIMME_INT *ldx, void *y_,
+int matrixMatvecSVDS_sprimme(dummy_type_sprimme *V, PRIMME_INT ldV, dummy_type_sprimme *W, PRIMME_INT ldW,
+      int basisSize, int blockSize, int conj, primme_context ctx);
+int convTestFunSVDS_sprimme(dummy_type_sprimme sval, dummy_type_sprimme *leftsvec, int givenLeftSvec,
+      dummy_type_sprimme *rightsvec, int givenRightSvec, dummy_type_sprimme rNorm, int method,
+      int *isconv, primme_context ctx);
+int monitorFunSVDS_sprimme(dummy_type_sprimme *basisSvals, int basisSize, int *basisFlags,
+      int *iblock, int blockSize, dummy_type_sprimme *basisNorms, int numConverged,
+      dummy_type_sprimme *lockedSvals, int numLocked, int *lockedFlags, dummy_type_sprimme *lockedNorms,
+      int inner_its, dummy_type_sprimme LSRes, const char *msg, double time,
+      primme_event event, int stage, double startTime, primme_context ctx);
+void matrixMatvec_eigs_sprimme(void *x_, PRIMME_INT *ldx, void *y_,
       PRIMME_INT *ldy, int *blockSize, primme_params *primme, int *ierr);
-void applyPreconditionerSVDSsprimme(void *x, PRIMME_INT *ldx, void *y,
+void applyPreconditioner_eigs_sprimme(void *x, PRIMME_INT *ldx, void *y,
       PRIMME_INT *ldy, int *blockSize, primme_params *primme, int *ierr);
 int Num_scalInv_Smatrixsprimme(dummy_type_sprimme *x, PRIMME_INT m, int n, PRIMME_INT ldx,
       dummy_type_sprimme *factors, primme_context ctx);
@@ -382,7 +866,7 @@ void monitor_stage2sprimme(void *basisEvals_, int *basisSize, int *basisFlags,
       void *lockedEvals_, int *numLocked, int *lockedFlags, void *lockedNorms_,
       int *inner_its, void *LSRes_, const char *msg, double *time,
       primme_event *event, primme_params *primme, int *err);
-int Xprimme_svds_auxcprimme(dummy_type_sprimme *svals, dummy_type_cprimme *svecs, dummy_type_sprimme *resNorms,
+int Xprimme_svds_auxcprimme(void *svals, dummy_type_cprimme *svecs, void *resNorms,
       primme_svds_params *primme_svds, primme_op_datatype svals_resNorms_type);
 int wrapper_svds_cprimme(void *svals_, void *svecs_, void *resNorms_,
       primme_op_datatype svals_resNorms_type, primme_op_datatype svecs_type,
@@ -394,11 +878,21 @@ int copy_last_params_from_svdscprimme(int stage, dummy_type_sprimme *svals, dumm
 int copy_last_params_to_svdscprimme(int stage, dummy_type_sprimme *svals, dummy_type_cprimme *svecs,
       dummy_type_sprimme *rnorms, int allocatedTargetShifts,
       primme_context ctx);
-int primme_svds_check_inputcprimme(dummy_type_sprimme *svals, dummy_type_cprimme *svecs, dummy_type_sprimme *resNorms,
+int primme_svds_check_inputcprimme(void *svals, void *svecs, void *resNorms,
       primme_svds_params *primme_svds);
-void matrixMatvecSVDScprimme(void *x_, PRIMME_INT *ldx, void *y_,
+int matrixMatvecSVDS_cprimme(dummy_type_cprimme *V, PRIMME_INT ldV, dummy_type_cprimme *W, PRIMME_INT ldW,
+      int basisSize, int blockSize, int conj, primme_context ctx);
+int convTestFunSVDS_cprimme(dummy_type_sprimme sval, dummy_type_cprimme *leftsvec, int givenLeftSvec,
+      dummy_type_cprimme *rightsvec, int givenRightSvec, dummy_type_sprimme rNorm, int method,
+      int *isconv, primme_context ctx);
+int monitorFunSVDS_cprimme(dummy_type_sprimme *basisSvals, int basisSize, int *basisFlags,
+      int *iblock, int blockSize, dummy_type_sprimme *basisNorms, int numConverged,
+      dummy_type_sprimme *lockedSvals, int numLocked, int *lockedFlags, dummy_type_sprimme *lockedNorms,
+      int inner_its, dummy_type_sprimme LSRes, const char *msg, double time,
+      primme_event event, int stage, double startTime, primme_context ctx);
+void matrixMatvec_eigs_cprimme(void *x_, PRIMME_INT *ldx, void *y_,
       PRIMME_INT *ldy, int *blockSize, primme_params *primme, int *ierr);
-void applyPreconditionerSVDScprimme(void *x, PRIMME_INT *ldx, void *y,
+void applyPreconditioner_eigs_cprimme(void *x, PRIMME_INT *ldx, void *y,
       PRIMME_INT *ldy, int *blockSize, primme_params *primme, int *ierr);
 int Num_scalInv_Smatrixcprimme(dummy_type_cprimme *x, PRIMME_INT m, int n, PRIMME_INT ldx,
       dummy_type_sprimme *factors, primme_context ctx);
@@ -434,7 +928,7 @@ void monitor_stage2cprimme(void *basisEvals_, int *basisSize, int *basisFlags,
       void *lockedEvals_, int *numLocked, int *lockedFlags, void *lockedNorms_,
       int *inner_its, void *LSRes_, const char *msg, double *time,
       primme_event *event, primme_params *primme, int *err);
-int Xprimme_svds_auxzprimme(dummy_type_dprimme *svals, dummy_type_zprimme *svecs, dummy_type_dprimme *resNorms,
+int Xprimme_svds_auxzprimme(void *svals, dummy_type_zprimme *svecs, void *resNorms,
       primme_svds_params *primme_svds, primme_op_datatype svals_resNorms_type);
 int wrapper_svds_zprimme(void *svals_, void *svecs_, void *resNorms_,
       primme_op_datatype svals_resNorms_type, primme_op_datatype svecs_type,
@@ -446,11 +940,21 @@ int copy_last_params_from_svdszprimme(int stage, dummy_type_dprimme *svals, dumm
 int copy_last_params_to_svdszprimme(int stage, dummy_type_dprimme *svals, dummy_type_zprimme *svecs,
       dummy_type_dprimme *rnorms, int allocatedTargetShifts,
       primme_context ctx);
-int primme_svds_check_inputzprimme(dummy_type_dprimme *svals, dummy_type_zprimme *svecs, dummy_type_dprimme *resNorms,
+int primme_svds_check_inputzprimme(void *svals, void *svecs, void *resNorms,
       primme_svds_params *primme_svds);
-void matrixMatvecSVDSzprimme(void *x_, PRIMME_INT *ldx, void *y_,
+int matrixMatvecSVDS_zprimme(dummy_type_zprimme *V, PRIMME_INT ldV, dummy_type_zprimme *W, PRIMME_INT ldW,
+      int basisSize, int blockSize, int conj, primme_context ctx);
+int convTestFunSVDS_zprimme(dummy_type_dprimme sval, dummy_type_zprimme *leftsvec, int givenLeftSvec,
+      dummy_type_zprimme *rightsvec, int givenRightSvec, dummy_type_dprimme rNorm, int method,
+      int *isconv, primme_context ctx);
+int monitorFunSVDS_zprimme(dummy_type_dprimme *basisSvals, int basisSize, int *basisFlags,
+      int *iblock, int blockSize, dummy_type_dprimme *basisNorms, int numConverged,
+      dummy_type_dprimme *lockedSvals, int numLocked, int *lockedFlags, dummy_type_dprimme *lockedNorms,
+      int inner_its, dummy_type_dprimme LSRes, const char *msg, double time,
+      primme_event event, int stage, double startTime, primme_context ctx);
+void matrixMatvec_eigs_zprimme(void *x_, PRIMME_INT *ldx, void *y_,
       PRIMME_INT *ldy, int *blockSize, primme_params *primme, int *ierr);
-void applyPreconditionerSVDSzprimme(void *x, PRIMME_INT *ldx, void *y,
+void applyPreconditioner_eigs_zprimme(void *x, PRIMME_INT *ldx, void *y,
       PRIMME_INT *ldy, int *blockSize, primme_params *primme, int *ierr);
 int Num_scalInv_Smatrixzprimme(dummy_type_zprimme *x, PRIMME_INT m, int n, PRIMME_INT ldx,
       dummy_type_dprimme *factors, primme_context ctx);
@@ -486,26 +990,36 @@ void monitor_stage2zprimme(void *basisEvals_, int *basisSize, int *basisFlags,
       void *lockedEvals_, int *numLocked, int *lockedFlags, void *lockedNorms_,
       int *inner_its, void *LSRes_, const char *msg, double *time,
       primme_event *event, primme_params *primme, int *err);
-int Xprimme_svds_auxmagma_hprimme(dummy_type_hprimme *svals, dummy_type_hprimme *svecs, dummy_type_hprimme *resNorms,
+int Xprimme_svds_auxmagma_hprimme(void *svals, dummy_type_hprimme *svecs, void *resNorms,
       primme_svds_params *primme_svds, primme_op_datatype svals_resNorms_type);
 int wrapper_svds_magma_hprimme(void *svals_, void *svecs_, void *resNorms_,
       primme_op_datatype svals_resNorms_type, primme_op_datatype svecs_type,
       int *outInitSize, primme_context ctx);
 int comp_doublemagma_hprimme(const void *a, const void *b);
-int copy_last_params_from_svdsmagma_hprimme(int stage, dummy_type_hprimme *svals, dummy_type_magma_hprimme *svecs,
-      dummy_type_hprimme *rnorms, int *allocatedTargetShifts,
+int copy_last_params_from_svdsmagma_hprimme(int stage, dummy_type_sprimme *svals, dummy_type_magma_hprimme *svecs,
+      dummy_type_sprimme *rnorms, int *allocatedTargetShifts,
       dummy_type_magma_hprimme **out_svecs, primme_context ctx);
-int copy_last_params_to_svdsmagma_hprimme(int stage, dummy_type_hprimme *svals, dummy_type_magma_hprimme *svecs,
-      dummy_type_hprimme *rnorms, int allocatedTargetShifts,
+int copy_last_params_to_svdsmagma_hprimme(int stage, dummy_type_sprimme *svals, dummy_type_magma_hprimme *svecs,
+      dummy_type_sprimme *rnorms, int allocatedTargetShifts,
       primme_context ctx);
-int primme_svds_check_inputmagma_hprimme(dummy_type_hprimme *svals, dummy_type_magma_hprimme *svecs, dummy_type_hprimme *resNorms,
+int primme_svds_check_inputmagma_hprimme(void *svals, void *svecs, void *resNorms,
       primme_svds_params *primme_svds);
-void matrixMatvecSVDSmagma_hprimme(void *x_, PRIMME_INT *ldx, void *y_,
+int matrixMatvecSVDS_magma_hprimme(dummy_type_magma_hprimme *V, PRIMME_INT ldV, dummy_type_magma_hprimme *W, PRIMME_INT ldW,
+      int basisSize, int blockSize, int conj, primme_context ctx);
+int convTestFunSVDS_magma_hprimme(dummy_type_sprimme sval, dummy_type_magma_hprimme *leftsvec, int givenLeftSvec,
+      dummy_type_magma_hprimme *rightsvec, int givenRightSvec, dummy_type_sprimme rNorm, int method,
+      int *isconv, primme_context ctx);
+int monitorFunSVDS_magma_hprimme(dummy_type_sprimme *basisSvals, int basisSize, int *basisFlags,
+      int *iblock, int blockSize, dummy_type_sprimme *basisNorms, int numConverged,
+      dummy_type_sprimme *lockedSvals, int numLocked, int *lockedFlags, dummy_type_sprimme *lockedNorms,
+      int inner_its, dummy_type_sprimme LSRes, const char *msg, double time,
+      primme_event event, int stage, double startTime, primme_context ctx);
+void matrixMatvec_eigs_magma_hprimme(void *x_, PRIMME_INT *ldx, void *y_,
       PRIMME_INT *ldy, int *blockSize, primme_params *primme, int *ierr);
-void applyPreconditionerSVDSmagma_hprimme(void *x, PRIMME_INT *ldx, void *y,
+void applyPreconditioner_eigs_magma_hprimme(void *x, PRIMME_INT *ldx, void *y,
       PRIMME_INT *ldy, int *blockSize, primme_params *primme, int *ierr);
 int Num_scalInv_Smatrixmagma_hprimme(dummy_type_magma_hprimme *x, PRIMME_INT m, int n, PRIMME_INT ldx,
-      dummy_type_hprimme *factors, primme_context ctx);
+      dummy_type_sprimme *factors, primme_context ctx);
 int globalSum_Rprimme_svdsmagma_hprimme(
       dummy_type_sprimme *sendBuf, dummy_type_sprimme *recvBuf, int count, primme_context ctx);
 int compute_resNormmagma_hprimme(dummy_type_magma_hprimme *leftsvec, dummy_type_magma_hprimme *rightsvec, dummy_type_sprimme *rNorm,
@@ -538,26 +1052,36 @@ void monitor_stage2magma_hprimme(void *basisEvals_, int *basisSize, int *basisFl
       void *lockedEvals_, int *numLocked, int *lockedFlags, void *lockedNorms_,
       int *inner_its, void *LSRes_, const char *msg, double *time,
       primme_event *event, primme_params *primme, int *err);
-int Xprimme_svds_auxmagma_kprimme(dummy_type_hprimme *svals, dummy_type_kprimme *svecs, dummy_type_hprimme *resNorms,
+int Xprimme_svds_auxmagma_kprimme(void *svals, dummy_type_kprimme *svecs, void *resNorms,
       primme_svds_params *primme_svds, primme_op_datatype svals_resNorms_type);
 int wrapper_svds_magma_kprimme(void *svals_, void *svecs_, void *resNorms_,
       primme_op_datatype svals_resNorms_type, primme_op_datatype svecs_type,
       int *outInitSize, primme_context ctx);
 int comp_doublemagma_kprimme(const void *a, const void *b);
-int copy_last_params_from_svdsmagma_kprimme(int stage, dummy_type_hprimme *svals, dummy_type_magma_kprimme *svecs,
-      dummy_type_hprimme *rnorms, int *allocatedTargetShifts,
+int copy_last_params_from_svdsmagma_kprimme(int stage, dummy_type_sprimme *svals, dummy_type_magma_kprimme *svecs,
+      dummy_type_sprimme *rnorms, int *allocatedTargetShifts,
       dummy_type_magma_kprimme **out_svecs, primme_context ctx);
-int copy_last_params_to_svdsmagma_kprimme(int stage, dummy_type_hprimme *svals, dummy_type_magma_kprimme *svecs,
-      dummy_type_hprimme *rnorms, int allocatedTargetShifts,
+int copy_last_params_to_svdsmagma_kprimme(int stage, dummy_type_sprimme *svals, dummy_type_magma_kprimme *svecs,
+      dummy_type_sprimme *rnorms, int allocatedTargetShifts,
       primme_context ctx);
-int primme_svds_check_inputmagma_kprimme(dummy_type_hprimme *svals, dummy_type_magma_kprimme *svecs, dummy_type_hprimme *resNorms,
+int primme_svds_check_inputmagma_kprimme(void *svals, void *svecs, void *resNorms,
       primme_svds_params *primme_svds);
-void matrixMatvecSVDSmagma_kprimme(void *x_, PRIMME_INT *ldx, void *y_,
+int matrixMatvecSVDS_magma_kprimme(dummy_type_magma_kprimme *V, PRIMME_INT ldV, dummy_type_magma_kprimme *W, PRIMME_INT ldW,
+      int basisSize, int blockSize, int conj, primme_context ctx);
+int convTestFunSVDS_magma_kprimme(dummy_type_sprimme sval, dummy_type_magma_kprimme *leftsvec, int givenLeftSvec,
+      dummy_type_magma_kprimme *rightsvec, int givenRightSvec, dummy_type_sprimme rNorm, int method,
+      int *isconv, primme_context ctx);
+int monitorFunSVDS_magma_kprimme(dummy_type_sprimme *basisSvals, int basisSize, int *basisFlags,
+      int *iblock, int blockSize, dummy_type_sprimme *basisNorms, int numConverged,
+      dummy_type_sprimme *lockedSvals, int numLocked, int *lockedFlags, dummy_type_sprimme *lockedNorms,
+      int inner_its, dummy_type_sprimme LSRes, const char *msg, double time,
+      primme_event event, int stage, double startTime, primme_context ctx);
+void matrixMatvec_eigs_magma_kprimme(void *x_, PRIMME_INT *ldx, void *y_,
       PRIMME_INT *ldy, int *blockSize, primme_params *primme, int *ierr);
-void applyPreconditionerSVDSmagma_kprimme(void *x, PRIMME_INT *ldx, void *y,
+void applyPreconditioner_eigs_magma_kprimme(void *x, PRIMME_INT *ldx, void *y,
       PRIMME_INT *ldy, int *blockSize, primme_params *primme, int *ierr);
 int Num_scalInv_Smatrixmagma_kprimme(dummy_type_magma_kprimme *x, PRIMME_INT m, int n, PRIMME_INT ldx,
-      dummy_type_hprimme *factors, primme_context ctx);
+      dummy_type_sprimme *factors, primme_context ctx);
 int globalSum_Rprimme_svdsmagma_kprimme(
       dummy_type_sprimme *sendBuf, dummy_type_sprimme *recvBuf, int count, primme_context ctx);
 int compute_resNormmagma_kprimme(dummy_type_magma_kprimme *leftsvec, dummy_type_magma_kprimme *rightsvec, dummy_type_sprimme *rNorm,
@@ -590,7 +1114,7 @@ void monitor_stage2magma_kprimme(void *basisEvals_, int *basisSize, int *basisFl
       void *lockedEvals_, int *numLocked, int *lockedFlags, void *lockedNorms_,
       int *inner_its, void *LSRes_, const char *msg, double *time,
       primme_event *event, primme_params *primme, int *err);
-int Xprimme_svds_auxmagma_sprimme(dummy_type_sprimme *svals, dummy_type_sprimme *svecs, dummy_type_sprimme *resNorms,
+int Xprimme_svds_auxmagma_sprimme(void *svals, dummy_type_sprimme *svecs, void *resNorms,
       primme_svds_params *primme_svds, primme_op_datatype svals_resNorms_type);
 int wrapper_svds_magma_sprimme(void *svals_, void *svecs_, void *resNorms_,
       primme_op_datatype svals_resNorms_type, primme_op_datatype svecs_type,
@@ -602,11 +1126,21 @@ int copy_last_params_from_svdsmagma_sprimme(int stage, dummy_type_sprimme *svals
 int copy_last_params_to_svdsmagma_sprimme(int stage, dummy_type_sprimme *svals, dummy_type_magma_sprimme *svecs,
       dummy_type_sprimme *rnorms, int allocatedTargetShifts,
       primme_context ctx);
-int primme_svds_check_inputmagma_sprimme(dummy_type_sprimme *svals, dummy_type_magma_sprimme *svecs, dummy_type_sprimme *resNorms,
+int primme_svds_check_inputmagma_sprimme(void *svals, void *svecs, void *resNorms,
       primme_svds_params *primme_svds);
-void matrixMatvecSVDSmagma_sprimme(void *x_, PRIMME_INT *ldx, void *y_,
+int matrixMatvecSVDS_magma_sprimme(dummy_type_magma_sprimme *V, PRIMME_INT ldV, dummy_type_magma_sprimme *W, PRIMME_INT ldW,
+      int basisSize, int blockSize, int conj, primme_context ctx);
+int convTestFunSVDS_magma_sprimme(dummy_type_sprimme sval, dummy_type_magma_sprimme *leftsvec, int givenLeftSvec,
+      dummy_type_magma_sprimme *rightsvec, int givenRightSvec, dummy_type_sprimme rNorm, int method,
+      int *isconv, primme_context ctx);
+int monitorFunSVDS_magma_sprimme(dummy_type_sprimme *basisSvals, int basisSize, int *basisFlags,
+      int *iblock, int blockSize, dummy_type_sprimme *basisNorms, int numConverged,
+      dummy_type_sprimme *lockedSvals, int numLocked, int *lockedFlags, dummy_type_sprimme *lockedNorms,
+      int inner_its, dummy_type_sprimme LSRes, const char *msg, double time,
+      primme_event event, int stage, double startTime, primme_context ctx);
+void matrixMatvec_eigs_magma_sprimme(void *x_, PRIMME_INT *ldx, void *y_,
       PRIMME_INT *ldy, int *blockSize, primme_params *primme, int *ierr);
-void applyPreconditionerSVDSmagma_sprimme(void *x, PRIMME_INT *ldx, void *y,
+void applyPreconditioner_eigs_magma_sprimme(void *x, PRIMME_INT *ldx, void *y,
       PRIMME_INT *ldy, int *blockSize, primme_params *primme, int *ierr);
 int Num_scalInv_Smatrixmagma_sprimme(dummy_type_magma_sprimme *x, PRIMME_INT m, int n, PRIMME_INT ldx,
       dummy_type_sprimme *factors, primme_context ctx);
@@ -642,7 +1176,7 @@ void monitor_stage2magma_sprimme(void *basisEvals_, int *basisSize, int *basisFl
       void *lockedEvals_, int *numLocked, int *lockedFlags, void *lockedNorms_,
       int *inner_its, void *LSRes_, const char *msg, double *time,
       primme_event *event, primme_params *primme, int *err);
-int Xprimme_svds_auxmagma_cprimme(dummy_type_sprimme *svals, dummy_type_cprimme *svecs, dummy_type_sprimme *resNorms,
+int Xprimme_svds_auxmagma_cprimme(void *svals, dummy_type_cprimme *svecs, void *resNorms,
       primme_svds_params *primme_svds, primme_op_datatype svals_resNorms_type);
 int wrapper_svds_magma_cprimme(void *svals_, void *svecs_, void *resNorms_,
       primme_op_datatype svals_resNorms_type, primme_op_datatype svecs_type,
@@ -654,11 +1188,21 @@ int copy_last_params_from_svdsmagma_cprimme(int stage, dummy_type_sprimme *svals
 int copy_last_params_to_svdsmagma_cprimme(int stage, dummy_type_sprimme *svals, dummy_type_magma_cprimme *svecs,
       dummy_type_sprimme *rnorms, int allocatedTargetShifts,
       primme_context ctx);
-int primme_svds_check_inputmagma_cprimme(dummy_type_sprimme *svals, dummy_type_magma_cprimme *svecs, dummy_type_sprimme *resNorms,
+int primme_svds_check_inputmagma_cprimme(void *svals, void *svecs, void *resNorms,
       primme_svds_params *primme_svds);
-void matrixMatvecSVDSmagma_cprimme(void *x_, PRIMME_INT *ldx, void *y_,
+int matrixMatvecSVDS_magma_cprimme(dummy_type_magma_cprimme *V, PRIMME_INT ldV, dummy_type_magma_cprimme *W, PRIMME_INT ldW,
+      int basisSize, int blockSize, int conj, primme_context ctx);
+int convTestFunSVDS_magma_cprimme(dummy_type_sprimme sval, dummy_type_magma_cprimme *leftsvec, int givenLeftSvec,
+      dummy_type_magma_cprimme *rightsvec, int givenRightSvec, dummy_type_sprimme rNorm, int method,
+      int *isconv, primme_context ctx);
+int monitorFunSVDS_magma_cprimme(dummy_type_sprimme *basisSvals, int basisSize, int *basisFlags,
+      int *iblock, int blockSize, dummy_type_sprimme *basisNorms, int numConverged,
+      dummy_type_sprimme *lockedSvals, int numLocked, int *lockedFlags, dummy_type_sprimme *lockedNorms,
+      int inner_its, dummy_type_sprimme LSRes, const char *msg, double time,
+      primme_event event, int stage, double startTime, primme_context ctx);
+void matrixMatvec_eigs_magma_cprimme(void *x_, PRIMME_INT *ldx, void *y_,
       PRIMME_INT *ldy, int *blockSize, primme_params *primme, int *ierr);
-void applyPreconditionerSVDSmagma_cprimme(void *x, PRIMME_INT *ldx, void *y,
+void applyPreconditioner_eigs_magma_cprimme(void *x, PRIMME_INT *ldx, void *y,
       PRIMME_INT *ldy, int *blockSize, primme_params *primme, int *ierr);
 int Num_scalInv_Smatrixmagma_cprimme(dummy_type_magma_cprimme *x, PRIMME_INT m, int n, PRIMME_INT ldx,
       dummy_type_sprimme *factors, primme_context ctx);
@@ -694,7 +1238,7 @@ void monitor_stage2magma_cprimme(void *basisEvals_, int *basisSize, int *basisFl
       void *lockedEvals_, int *numLocked, int *lockedFlags, void *lockedNorms_,
       int *inner_its, void *LSRes_, const char *msg, double *time,
       primme_event *event, primme_params *primme, int *err);
-int Xprimme_svds_auxmagma_dprimme(dummy_type_dprimme *svals, dummy_type_dprimme *svecs, dummy_type_dprimme *resNorms,
+int Xprimme_svds_auxmagma_dprimme(void *svals, dummy_type_dprimme *svecs, void *resNorms,
       primme_svds_params *primme_svds, primme_op_datatype svals_resNorms_type);
 int wrapper_svds_magma_dprimme(void *svals_, void *svecs_, void *resNorms_,
       primme_op_datatype svals_resNorms_type, primme_op_datatype svecs_type,
@@ -706,11 +1250,21 @@ int copy_last_params_from_svdsmagma_dprimme(int stage, dummy_type_dprimme *svals
 int copy_last_params_to_svdsmagma_dprimme(int stage, dummy_type_dprimme *svals, dummy_type_magma_dprimme *svecs,
       dummy_type_dprimme *rnorms, int allocatedTargetShifts,
       primme_context ctx);
-int primme_svds_check_inputmagma_dprimme(dummy_type_dprimme *svals, dummy_type_magma_dprimme *svecs, dummy_type_dprimme *resNorms,
+int primme_svds_check_inputmagma_dprimme(void *svals, void *svecs, void *resNorms,
       primme_svds_params *primme_svds);
-void matrixMatvecSVDSmagma_dprimme(void *x_, PRIMME_INT *ldx, void *y_,
+int matrixMatvecSVDS_magma_dprimme(dummy_type_magma_dprimme *V, PRIMME_INT ldV, dummy_type_magma_dprimme *W, PRIMME_INT ldW,
+      int basisSize, int blockSize, int conj, primme_context ctx);
+int convTestFunSVDS_magma_dprimme(dummy_type_dprimme sval, dummy_type_magma_dprimme *leftsvec, int givenLeftSvec,
+      dummy_type_magma_dprimme *rightsvec, int givenRightSvec, dummy_type_dprimme rNorm, int method,
+      int *isconv, primme_context ctx);
+int monitorFunSVDS_magma_dprimme(dummy_type_dprimme *basisSvals, int basisSize, int *basisFlags,
+      int *iblock, int blockSize, dummy_type_dprimme *basisNorms, int numConverged,
+      dummy_type_dprimme *lockedSvals, int numLocked, int *lockedFlags, dummy_type_dprimme *lockedNorms,
+      int inner_its, dummy_type_dprimme LSRes, const char *msg, double time,
+      primme_event event, int stage, double startTime, primme_context ctx);
+void matrixMatvec_eigs_magma_dprimme(void *x_, PRIMME_INT *ldx, void *y_,
       PRIMME_INT *ldy, int *blockSize, primme_params *primme, int *ierr);
-void applyPreconditionerSVDSmagma_dprimme(void *x, PRIMME_INT *ldx, void *y,
+void applyPreconditioner_eigs_magma_dprimme(void *x, PRIMME_INT *ldx, void *y,
       PRIMME_INT *ldy, int *blockSize, primme_params *primme, int *ierr);
 int Num_scalInv_Smatrixmagma_dprimme(dummy_type_magma_dprimme *x, PRIMME_INT m, int n, PRIMME_INT ldx,
       dummy_type_dprimme *factors, primme_context ctx);
@@ -746,7 +1300,7 @@ void monitor_stage2magma_dprimme(void *basisEvals_, int *basisSize, int *basisFl
       void *lockedEvals_, int *numLocked, int *lockedFlags, void *lockedNorms_,
       int *inner_its, void *LSRes_, const char *msg, double *time,
       primme_event *event, primme_params *primme, int *err);
-int Xprimme_svds_auxmagma_zprimme(dummy_type_dprimme *svals, dummy_type_zprimme *svecs, dummy_type_dprimme *resNorms,
+int Xprimme_svds_auxmagma_zprimme(void *svals, dummy_type_zprimme *svecs, void *resNorms,
       primme_svds_params *primme_svds, primme_op_datatype svals_resNorms_type);
 int wrapper_svds_magma_zprimme(void *svals_, void *svecs_, void *resNorms_,
       primme_op_datatype svals_resNorms_type, primme_op_datatype svecs_type,
@@ -758,11 +1312,21 @@ int copy_last_params_from_svdsmagma_zprimme(int stage, dummy_type_dprimme *svals
 int copy_last_params_to_svdsmagma_zprimme(int stage, dummy_type_dprimme *svals, dummy_type_magma_zprimme *svecs,
       dummy_type_dprimme *rnorms, int allocatedTargetShifts,
       primme_context ctx);
-int primme_svds_check_inputmagma_zprimme(dummy_type_dprimme *svals, dummy_type_magma_zprimme *svecs, dummy_type_dprimme *resNorms,
+int primme_svds_check_inputmagma_zprimme(void *svals, void *svecs, void *resNorms,
       primme_svds_params *primme_svds);
-void matrixMatvecSVDSmagma_zprimme(void *x_, PRIMME_INT *ldx, void *y_,
+int matrixMatvecSVDS_magma_zprimme(dummy_type_magma_zprimme *V, PRIMME_INT ldV, dummy_type_magma_zprimme *W, PRIMME_INT ldW,
+      int basisSize, int blockSize, int conj, primme_context ctx);
+int convTestFunSVDS_magma_zprimme(dummy_type_dprimme sval, dummy_type_magma_zprimme *leftsvec, int givenLeftSvec,
+      dummy_type_magma_zprimme *rightsvec, int givenRightSvec, dummy_type_dprimme rNorm, int method,
+      int *isconv, primme_context ctx);
+int monitorFunSVDS_magma_zprimme(dummy_type_dprimme *basisSvals, int basisSize, int *basisFlags,
+      int *iblock, int blockSize, dummy_type_dprimme *basisNorms, int numConverged,
+      dummy_type_dprimme *lockedSvals, int numLocked, int *lockedFlags, dummy_type_dprimme *lockedNorms,
+      int inner_its, dummy_type_dprimme LSRes, const char *msg, double time,
+      primme_event event, int stage, double startTime, primme_context ctx);
+void matrixMatvec_eigs_magma_zprimme(void *x_, PRIMME_INT *ldx, void *y_,
       PRIMME_INT *ldy, int *blockSize, primme_params *primme, int *ierr);
-void applyPreconditionerSVDSmagma_zprimme(void *x, PRIMME_INT *ldx, void *y,
+void applyPreconditioner_eigs_magma_zprimme(void *x, PRIMME_INT *ldx, void *y,
       PRIMME_INT *ldy, int *blockSize, primme_params *primme, int *ierr);
 int Num_scalInv_Smatrixmagma_zprimme(dummy_type_magma_zprimme *x, PRIMME_INT m, int n, PRIMME_INT ldx,
       dummy_type_dprimme *factors, primme_context ctx);
