@@ -1,4 +1,4 @@
-ac1cb7136b06b75e42d584d1f8713c4f *DESCRIPTION
+853fd5e07fd0e9d8e48dac5524035329 *DESCRIPTION
 a45751ce5cc779193961625b55c6393f *NAMESPACE
 81d597792c22a8f1708efb98f421717e *R/RcppExports.R
 a256b631cd121e952998b3a0b30fdbab *R/eigs.R
@@ -15,7 +15,7 @@ fdc8dc8db1789dfb6e03cbc560704457 *inst/include/primme_ls.h
 0501567a06ede0425b19dd8c5fc6f84c *inst/include/primme_svds_f77.h
 b11d72b26eebc8d9e8802420cbeb4ad5 *man/eigs_sym.Rd
 e710c279f868116a6e33f03e7ed0aaba *man/svds.Rd
-117d8ac3110abcbb46e09d277e6479c7 *src/Makevars
+6a3aab76872dc1b4cfc52e05c9834af4 *src/Makevars
 76ab31c9e0fe9f7ece07a0bf8ad62b1b *src/PRIMME_types.h
 ea5893e571e5617e5c023c398050d351 *src/RcppExports.cpp
 922f58370584d9748b90fb5b710d80c7 *src/init.c
@@ -64,8 +64,8 @@ ff82495dbe11a2ee8a8fb3f9c1e94427 *src/primme/include/template_types.h
 8764cb66c24b97a252d50029c573030e *src/primme/include/template_undef.h
 9e58c693f09b44a3fcb3d39af327684c *src/primme/include/wtime.h
 3abb8a29b5b6b9511dc053981ef3fd80 *src/primme/linalg/auxiliary.c
-3b3ebd60556de229457a0ed4c3b52a71 *src/primme/linalg/blaslapack.c
-3def40b40c147fff32ea53f6fe6b0480 *src/primme/linalg/blaslapack_private.h
+a0bcf0f0b3dfa3903d1ae269e1241ba7 *src/primme/linalg/blaslapack.c
+ec066b67e48157e754ddea0641227686 *src/primme/linalg/blaslapack_private.h
 0ab7340911ec36d95df510a0dcf20c05 *src/primme/linalg/magma_wrapper.c
 10870dfe42cd0a285d7b6d375f192a08 *src/primme/linalg/memman.c
 4b658d035efa1569373c24de238f1308 *src/primme/linalg/wtime.c
@@ -73,7 +73,7 @@ ca9cc9ff0e08c5a8ced5ac1fdb7cc032 *src/primme/make_primme
 2940bc593a81acb984b119573dd080e5 *src/primme/svds/primme_svds_c.c
 4ce765024eb8993a6328535a7ff5897b *src/primme/svds/primme_svds_c.h
 8d9ab2bad8dc08f647d6b21edb8cc8a4 *src/primme/svds/primme_svds_f77.c
-f372be45a454ca3c256cd563a6ee3136 *src/primme/svds/primme_svds_interface.c
+1c8706165a4618b0d7c85fac406b809c *src/primme/svds/primme_svds_interface.c
 85980c7d92de190282d51d23d42401e4 *src/primme/svds/primme_svds_interface.h
 bd7ce547472afa19577000f6ea6d0260 *src/primme/zhegv.c
 270d88b775ae867366f2c42984633d75 *src/primmeR.cpp
