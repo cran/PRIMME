@@ -1,8 +1,4 @@
 PKG_CXXFLAGS = -I../inst/include  -DPRIMME_INT_SIZE=0
-LTO =
-LTO_FC =
-LTO_LD =
-
 # Linker will discard primmeext if R provides a full LAPACK
 PKG_LIBS = -Lprimme -lprimme $(LAPACK_LIBS) -lprimmeext $(BLAS_LIBS) $(FLIBS)
 
