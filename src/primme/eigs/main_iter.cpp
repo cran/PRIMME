@@ -34,7 +34,7 @@
  ******************************************************************************/
 
 #ifndef THIS_FILE
-#define THIS_FILE "../eigs/main_iter.c"
+#define THIS_FILE "../eigs/main_iter.cpp"
 #endif
 
 

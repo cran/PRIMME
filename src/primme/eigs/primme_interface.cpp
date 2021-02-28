@@ -37,7 +37,7 @@
  ******************************************************************************/
 
 #ifndef THIS_FILE
-#define THIS_FILE "../eigs/primme_interface.c"
+#define THIS_FILE "../eigs/primme_interface.cpp"
 #endif
 
 #include <stdlib.h>   /* mallocs, free */

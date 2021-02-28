@@ -33,7 +33,7 @@
  *
  ******************************************************************************/
 
-#define THIS_FILE "../linalg/wtime.c"
+#define THIS_FILE "../linalg/wtime.cpp"
 
 #include <stdlib.h>
 #if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))

@@ -34,7 +34,7 @@
  ******************************************************************************/
 
 #ifndef THIS_FILE
-#define THIS_FILE "../linalg/auxiliary.c"
+#define THIS_FILE "../linalg/auxiliary.cpp"
 #endif
 
 #include <string.h>   /* memmove */

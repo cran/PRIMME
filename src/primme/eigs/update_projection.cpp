@@ -34,7 +34,7 @@
  ******************************************************************************/
 
 #ifndef THIS_FILE
-#define THIS_FILE "../eigs/update_projection.c"
+#define THIS_FILE "../eigs/update_projection.cpp"
 #endif
 
 

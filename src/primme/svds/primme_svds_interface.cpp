@@ -34,7 +34,7 @@
  ******************************************************************************/
 
 #ifndef THIS_FILE
-#define THIS_FILE "../svds/primme_svds_interface.c"
+#define THIS_FILE "../svds/primme_svds_interface.cpp"
 #endif
 
 

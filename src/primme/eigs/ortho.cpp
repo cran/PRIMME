@@ -63,7 +63,7 @@
  ******************************************************************************/
 
 #ifndef THIS_FILE
-#define THIS_FILE "../eigs/ortho.c"
+#define THIS_FILE "../eigs/ortho.cpp"
 #endif
 
 #include <assert.h>

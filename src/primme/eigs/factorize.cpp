@@ -35,7 +35,7 @@
  ******************************************************************************/
 
 #ifndef THIS_FILE
-#define THIS_FILE "../eigs/factorize.c"
+#define THIS_FILE "../eigs/factorize.cpp"
 #endif
 
 #include "numerical.h"

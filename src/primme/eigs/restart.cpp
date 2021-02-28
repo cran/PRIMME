@@ -34,7 +34,7 @@
  ******************************************************************************/
 
 #ifndef THIS_FILE
-#define THIS_FILE "../eigs/restart.c"
+#define THIS_FILE "../eigs/restart.cpp"
 #endif
 
 #include "numerical.h"

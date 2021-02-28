@@ -34,7 +34,7 @@
  ******************************************************************************/
 
 #ifndef THIS_FILE
-#define THIS_FILE "../eigs/solve_projection.c"
+#define THIS_FILE "../eigs/solve_projection.cpp"
 #endif
 
 #include <math.h>

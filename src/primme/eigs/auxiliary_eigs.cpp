@@ -35,7 +35,7 @@
  ******************************************************************************/
 
 #ifndef THIS_FILE
-#define THIS_FILE "../eigs/auxiliary_eigs.c"
+#define THIS_FILE "../eigs/auxiliary_eigs.cpp"
 #endif
 
 #include <string.h> /* memset */

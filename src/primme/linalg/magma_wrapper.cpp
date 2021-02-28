@@ -35,7 +35,7 @@
  ******************************************************************************/
 
 #ifndef THIS_FILE
-#define THIS_FILE "../linalg/magma_wrapper.c"
+#define THIS_FILE "../linalg/magma_wrapper.cpp"
 #endif
 
 #include "numerical.h"

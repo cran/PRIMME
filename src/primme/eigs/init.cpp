@@ -35,7 +35,7 @@
  ******************************************************************************/
 
 #ifndef THIS_FILE
-#define THIS_FILE "../eigs/init.c"
+#define THIS_FILE "../eigs/init.cpp"
 #endif
 
 #include <stdlib.h>

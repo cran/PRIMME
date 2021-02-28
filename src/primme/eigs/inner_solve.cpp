@@ -34,7 +34,7 @@
  ******************************************************************************/
 
 #ifndef THIS_FILE
-#define THIS_FILE "../eigs/inner_solve.c"
+#define THIS_FILE "../eigs/inner_solve.cpp"
 #endif
 
 #include "numerical.h"

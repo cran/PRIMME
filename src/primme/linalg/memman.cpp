@@ -35,7 +35,7 @@
  ******************************************************************************/
 
 #ifndef THIS_FILE
-#define THIS_FILE "../linalg/memman.c"
+#define THIS_FILE "../linalg/memman.cpp"
 #endif
 
 #include <stdlib.h>   /* free */

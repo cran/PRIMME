@@ -34,7 +34,7 @@
  *
  ******************************************************************************/
 
-#define THIS_FILE "../linalg/blaslapack.c"
+#define THIS_FILE "../linalg/blaslapack.cpp"
 
 #include <string.h>   /* memmove */
 #include <assert.h>
