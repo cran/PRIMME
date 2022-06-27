@@ -1,4 +1,4 @@
-aaf514bcb9f26fd6dba0feada3402d52 *DESCRIPTION
+77180ae5d0c43b5bce999bcf4dc2976d *DESCRIPTION
 a45751ce5cc779193961625b55c6393f *NAMESPACE
 81d597792c22a8f1708efb98f421717e *R/RcppExports.R
 a812529389098918a3b4b066001ed4bb *R/eigs.R
@@ -64,7 +64,7 @@ ff82495dbe11a2ee8a8fb3f9c1e94427 *src/primme/include/template_types.h
 9e58c693f09b44a3fcb3d39af327684c *src/primme/include/wtime.h
 80a4322e482435c33fa2bf239211f4be *src/primme/linalg/auxiliary.cpp
 7f53e84d837bcb6a3140a5346245c33c *src/primme/linalg/blaslapack.cpp
-37de396af66ddba1af20426b36aae491 *src/primme/linalg/blaslapack_private.h
+add7292ee134d4576a817642b7005556 *src/primme/linalg/blaslapack_private.h
 d2241a860f2addc41b49554d722a22a9 *src/primme/linalg/magma_wrapper.cpp
 58af2acb058dbed9d91e528c7c3e50da *src/primme/linalg/memman.cpp
 af62fac387a7c77069c84043fd3db32d *src/primme/linalg/wtime.cpp
@@ -75,5 +75,5 @@ af62fac387a7c77069c84043fd3db32d *src/primme/linalg/wtime.cpp
 85f0252b7e8c5eabb1f07986e12bfd25 *src/primme/svds/primme_svds_interface.cpp
 85980c7d92de190282d51d23d42401e4 *src/primme/svds/primme_svds_interface.h
 bd7ce547472afa19577000f6ea6d0260 *src/primme/zhegv.c
-3bccecb4b696aa4d7139a6bab9af8297 *src/primmeR.cpp
+62c29f08eb5068234420030d867c92db *src/primmeR.cpp
 d3c997d4db3849d7bc06d1c2b4a2d2cc *tests/tests.R
