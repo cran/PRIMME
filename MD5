@@ -1,4 +1,4 @@
-193f37e441a23c23dfc821e7706a9aee *DESCRIPTION
+29a0457ee6cd24b06b2437959894c6f4 *DESCRIPTION
 a45751ce5cc779193961625b55c6393f *NAMESPACE
 ea2475134044c2dc89879643178d6484 *R/RcppExports.R
 a812529389098918a3b4b066001ed4bb *R/eigs.R
@@ -79,5 +79,5 @@ b6b15d02ede6c5b8686083deb6de17e8 *src/primme/svds/primme_svds_c.h
 85f0252b7e8c5eabb1f07986e12bfd25 *src/primme/svds/primme_svds_interface.cpp
 85980c7d92de190282d51d23d42401e4 *src/primme/svds/primme_svds_interface.h
 9f5764e97d3f3f50f3d172d8121338bd *src/primme/zhegv.c
-7b73461a92cd7ded3a157bb77af0c2ab *src/primmeR.cpp
+6b5ae9e8146fef8c2865b6e6d0b19d74 *src/primmeR.cpp
 d3c997d4db3849d7bc06d1c2b4a2d2cc *tests/tests.R
