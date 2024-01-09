@@ -1,8 +1,8 @@
 Package: PRIMME
 Type: Package
 Title: Eigenvalues and Singular Values and Vectors from Large Matrices
-Version: 3.2-5
-Date: 2023-09-30
+Version: 3.2-6
+Date: 2024-01-10
 Authors@R: c(person("Eloy", "Romero", role=c("aut", "cre"), email="eloy@cs.wm.edu"),
              person("Andreas", "Stathopoulos", role="aut", email="andreas@cs.wm.edu"),
              person("Lingfei", "Wu", role="aut", email="wuli@us.ibm.com"),
@@ -20,19 +20,18 @@ Description:
 URL: https://www.cs.wm.edu/~andreas/software/
         https://github.com/primme/primme
 BugReports: https://github.com/primme/primme/issues
-Imports: Rcpp (>= 0.11.4)
+Imports: Rcpp (>= 0.11.4), Matrix
 LinkingTo: Rcpp, Matrix
-Suggests: Matrix
 SystemRequirements: A POSIX system. Currently Linux and OS X are known
         to work. GNU make.
 NeedsCompilation: yes
 License: GPL-3
 Encoding: UTF-8
 RoxygenNote: 7.2.3
-Packaged: 2023-09-30 22:15:02 UTC; eromero
+Packaged: 2024-01-09 13:39:04 UTC; eromero
 Author: Eloy Romero [aut, cre],
   Andreas Stathopoulos [aut],
   Lingfei Wu [aut],
   College of William & Mary [cph]
 Repository: CRAN
-Date/Publication: 2023-09-30 22:42:50 UTC
+Date/Publication: 2024-01-09 14:00:08 UTC

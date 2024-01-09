@@ -1,6 +1,6 @@
-29a0457ee6cd24b06b2437959894c6f4 *DESCRIPTION
+c3650ff6fdf7166c7c7cba7bafb17ffb *DESCRIPTION
 a45751ce5cc779193961625b55c6393f *NAMESPACE
-ea2475134044c2dc89879643178d6484 *R/RcppExports.R
+0f27a0f385f797d60fc62dca04203969 *R/RcppExports.R
 a812529389098918a3b4b066001ed4bb *R/eigs.R
 ba788a0712fbc90bd57bd25c019160b4 *R/svds.R
 1a1d83a963c3057055361e2d5c7105b4 *README.md
@@ -19,7 +19,7 @@ fdc536d1319f6e7311ee7dad60abbe7a *man/eigs_sym.Rd
 d51ce3b574f85fcffad429173ed0a62a *man/svds.Rd
 47aace4d648432ddbd0f99f7e6ea5c15 *src/Makevars
 d9413bb8afdbcbc729622c29afa4a557 *src/PRIMME_types.h
-118a07e25d27ceee2ebd7582cec7f22e *src/RcppExports.cpp
+f8e44aa6715a91bcb7d71b221fc4e254 *src/RcppExports.cpp
 ddeeaa26ee43a89dfe1fbe064e40e3f5 *src/primme/eigs/auxiliary_eigs.cpp
 49374fd80e6b8d5be357d972f1f18ce8 *src/primme/eigs/auxiliary_eigs.h
 eda488c2f894358e0b8ad59482f15307 *src/primme/eigs/auxiliary_eigs_normal.cpp
@@ -54,8 +54,8 @@ a10d78e72e94be7534dab1ec99ced66d *src/primme/eigs/update_projection.cpp
 5f19e4a89afba57d70946bd4a16676d1 *src/primme/eigs/update_projection.h
 0635e77866569ee780cbbd88d280c769 *src/primme/include/auxiliary.h
 095d642e38ab08adf21eb9d0426a640b *src/primme/include/blaslapack.h
-6a0bdefa52e0e3ed91ad5f013dc06261 *src/primme/include/common.h
-b9ed8d73e8d536009b0bb938f10eb3c2 *src/primme/include/cublas_wrapper.h
+8f0f3f80dd879815e00a7a72a02a21ed *src/primme/include/common.h
+5d0499d85079974dd339051629f0f169 *src/primme/include/cublas_wrapper.h
 cc1baad1b82a30a8ac2d59d28498c29a *src/primme/include/magma_wrapper.h
 401c40a3a4ed428014ce72b90a6e57fc *src/primme/include/memman.h
 239e756b33950391f8ae32b34895a826 *src/primme/include/notemplate.h
@@ -66,10 +66,10 @@ fd7a8d8c3c9b82c2139e5e5be5793bd5 *src/primme/include/primme_interface.h
 5f8612f6105725b3c7d5217886d25949 *src/primme/include/template_undef.h
 9e58c693f09b44a3fcb3d39af327684c *src/primme/include/wtime.h
 04a106af88737851ccec5d64be4bb579 *src/primme/linalg/auxiliary.cpp
-60a512b9f58f725607401acf68a167ff *src/primme/linalg/blaslapack.cpp
+3da5c3caeef65537807285010e41d9de *src/primme/linalg/blaslapack.cpp
 add7292ee134d4576a817642b7005556 *src/primme/linalg/blaslapack_private.h
-c71a92f93e3c58ce32774a9752184f05 *src/primme/linalg/cublas_wrapper.cpp
-d2241a860f2addc41b49554d722a22a9 *src/primme/linalg/magma_wrapper.cpp
+3e7cd9bf635842f16bea6dff5fc2c241 *src/primme/linalg/cublas_wrapper.cpp
+39c80d3bd480872e92e864debe5396b3 *src/primme/linalg/magma_wrapper.cpp
 e9a1d2abd803a06eea7dbbdfe424acd6 *src/primme/linalg/memman.cpp
 e65d4571bbcca7f465e61c771a4f653b *src/primme/linalg/wtime.cpp
 47fb90634f23e01a906c0f21be0cf53e *src/primme/make_primme
